@@ -1,0 +1,1883 @@
+/* =========================================================
+   RÁKÓCZI EKULTÚRA KUPA 2.0 – LEVEL UP
+   IT SZABADULÓSZOBA
+   ========================================================= */
+
+
+/* =========================================================
+   ALAP
+   ========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+:root {
+
+    --bg: #05080d;
+
+    --panel: #0a1018;
+
+    --panel-light: #0d1620;
+
+    --border: rgba(0, 220, 255, 0.22);
+
+    --cyan: #00e5ff;
+
+    --cyan-dark: #008ca3;
+
+    --green: #00ff88;
+
+    --red: #ff3b5c;
+
+    --yellow: #ffc400;
+
+    --text: #e7faff;
+
+    --muted: #718493;
+
+    --shadow:
+        0 0 30px rgba(0, 229, 255, 0.08);
+}
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+body {
+
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            circle at 20% 10%,
+            rgba(0, 229, 255, 0.08),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 80% 80%,
+            rgba(0, 255, 136, 0.04),
+            transparent 30%
+        ),
+        var(--bg);
+
+    color: var(--text);
+
+    font-family:
+        "Roboto Mono",
+        monospace;
+
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HÁTTÉR RÁCS
+   ========================================================= */
+
+.background-grid {
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    opacity: 0.16;
+
+    background-image:
+
+        linear-gradient(
+            rgba(0, 229, 255, 0.12) 1px,
+            transparent 1px
+        ),
+
+        linear-gradient(
+            90deg,
+            rgba(0, 229, 255, 0.12) 1px,
+            transparent 1px
+        );
+
+    background-size: 45px 45px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            black,
+            transparent 90%
+        );
+
+    z-index: -2;
+}
+
+
+/* =========================================================
+   SCANLINE
+   ========================================================= */
+
+.scanline {
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            transparent 50%,
+            rgba(0, 229, 255, 0.015) 50%
+        );
+
+    background-size: 100% 4px;
+
+    z-index: 100;
+
+    opacity: 0.35;
+}
+
+
+/* =========================================================
+   OLDAL
+   ========================================================= */
+
+.page {
+
+    width: min(1500px, 94%);
+
+    margin: 0 auto;
+
+    padding: 30px 0 50px;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+
+    margin-bottom: 28px;
+}
+
+
+.hero-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 22px;
+}
+
+
+.school-tag {
+
+    padding: 7px 13px;
+
+    border: 1px solid var(--border);
+
+    background: rgba(0, 229, 255, 0.04);
+
+    color: var(--cyan);
+
+    font-size: 11px;
+
+    letter-spacing: 2px;
+
+    font-weight: 700;
+}
+
+
+.security-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: var(--green);
+
+    font-size: 10px;
+
+    letter-spacing: 1.5px;
+}
+
+
+.status-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    background: var(--green);
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 8px var(--green);
+
+    animation: pulse 1.6s infinite;
+}
+
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+}
+
+
+.hero-content {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 25px;
+}
+
+
+.hero-icon {
+
+    width: 80px;
+
+    height: 80px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px solid var(--cyan);
+
+    color: var(--cyan);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    box-shadow:
+        inset 0 0 20px rgba(0, 229, 255, 0.08),
+        0 0 25px rgba(0, 229, 255, 0.08);
+}
+
+
+.eyebrow {
+
+    color: var(--cyan);
+
+    font-size: 11px;
+
+    letter-spacing: 4px;
+
+    margin-bottom: 5px;
+}
+
+
+h1 {
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: clamp(42px, 7vw, 86px);
+
+    line-height: 0.95;
+
+    letter-spacing: 3px;
+
+    font-weight: 800;
+}
+
+
+h1 span {
+
+    color: var(--cyan);
+
+    text-shadow:
+        0 0 20px rgba(0, 229, 255, 0.5);
+}
+
+
+.hero-subtitle {
+
+    margin-top: 10px;
+
+    color: var(--muted);
+
+    font-size: 14px;
+
+    letter-spacing: 5px;
+}
+
+
+/* =========================================================
+   MISSION
+   ========================================================= */
+
+.mission-box {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-top: 25px;
+
+    padding: 17px 20px;
+
+    border-left: 3px solid var(--yellow);
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255, 196, 0, 0.07),
+            rgba(255, 196, 0, 0.015)
+        );
+
+    color: #c8d4dc;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+.mission-icon {
+
+    color: var(--yellow);
+
+    font-size: 24px;
+
+    flex-shrink: 0;
+}
+
+
+.mission-box strong {
+
+    color: var(--yellow);
+
+    margin-right: 7px;
+}
+
+
+/* =========================================================
+   FŐ KÉT HASÁB
+   ========================================================= */
+
+.game-layout {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.55fr)
+        minmax(370px, 0.8fr);
+
+    gap: 25px;
+
+    align-items: start;
+}
+
+
+/* =========================================================
+   BAL OLDAL
+   ========================================================= */
+
+.tasks-area {
+
+    min-width: 0;
+}
+
+
+.section-heading {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: end;
+
+    margin-bottom: 16px;
+
+    padding-bottom: 13px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+
+.section-label {
+
+    display: block;
+
+    color: var(--cyan);
+
+    font-size: 9px;
+
+    letter-spacing: 3px;
+
+    margin-bottom: 5px;
+}
+
+
+.section-heading h2 {
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 20px;
+
+    letter-spacing: 1px;
+}
+
+
+.level-counter {
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    border: 1px solid var(--border);
+
+    padding: 7px 10px;
+}
+
+
+/* =========================================================
+   FELADATOK
+   ========================================================= */
+
+.levels-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+}
+
+
+.level-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(0, 229, 255, 0.18);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(13, 22, 32, 0.96),
+            rgba(7, 12, 18, 0.96)
+        );
+
+    transition:
+        border-color 0.3s,
+        box-shadow 0.3s,
+        opacity 0.3s,
+        transform 0.3s;
+}
+
+
+.level-card::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    width: 3px;
+
+    height: 100%;
+
+    background: var(--muted);
+
+    transition: 0.3s;
+}
+
+
+.level-card.active {
+
+    border-color:
+        rgba(0, 229, 255, 0.45);
+
+    box-shadow:
+        0 0 25px rgba(0, 229, 255, 0.05);
+}
+
+
+.level-card.active::before {
+
+    background: var(--cyan);
+
+    box-shadow:
+        0 0 15px var(--cyan);
+}
+
+
+.level-card.locked {
+
+    opacity: 0.45;
+
+    filter: grayscale(0.3);
+}
+
+
+.level-card.done {
+
+    border-color:
+        rgba(0, 255, 136, 0.4);
+
+    box-shadow:
+        0 0 25px rgba(0, 255, 136, 0.05);
+}
+
+
+.level-card.done::before {
+
+    background: var(--green);
+
+    box-shadow:
+        0 0 15px var(--green);
+}
+
+
+.level-card.wrong {
+
+    animation: shake 0.35s;
+
+    border-color: var(--red);
+}
+
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-6px);
+    }
+
+    75% {
+        transform: translateX(6px);
+    }
+}
+
+
+/* =========================================================
+   FELADAT FEJLÉC
+   ========================================================= */
+
+.level-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 12px 17px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.05);
+
+    background:
+        rgba(255, 255, 255, 0.015);
+}
+
+
+.level-number {
+
+    color: var(--cyan);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 11px;
+
+    letter-spacing: 2px;
+
+    font-weight: 700;
+}
+
+
+.level-status {
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    letter-spacing: 1px;
+}
+
+
+.level-card.active .level-status {
+
+    color: var(--cyan);
+}
+
+
+.level-card.done .level-status {
+
+    color: var(--green);
+}
+
+
+/* =========================================================
+   FELADAT TARTALOM
+   ========================================================= */
+
+.level-content {
+
+    padding: 19px;
+}
+
+
+.level-content h2 {
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 17px;
+
+    color: #ffffff;
+
+    margin-bottom: 10px;
+}
+
+
+.level-content p {
+
+    color: #aebdc7;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+    margin-bottom: 17px;
+}
+
+
+/* =========================================================
+   VÁLASZ
+   ========================================================= */
+
+.answer-area {
+
+    display: flex;
+
+    gap: 9px;
+}
+
+
+.answer-area input {
+
+    flex: 1;
+
+    min-width: 0;
+
+    height: 45px;
+
+    padding: 0 14px;
+
+    border: 1px solid
+        rgba(0, 229, 255, 0.22);
+
+    outline: none;
+
+    background: #050a0f;
+
+    color: var(--text);
+
+    font-family: "Roboto Mono", monospace;
+
+    font-size: 12px;
+
+    transition: 0.25s;
+}
+
+
+.answer-area input:focus {
+
+    border-color: var(--cyan);
+
+    box-shadow:
+        0 0 15px rgba(0, 229, 255, 0.1);
+}
+
+
+.answer-area input:disabled {
+
+    opacity: 0.5;
+
+    cursor: not-allowed;
+}
+
+
+.answer-area button {
+
+    min-width: 135px;
+
+    border: 1px solid var(--cyan);
+
+    background:
+        rgba(0, 229, 255, 0.06);
+
+    color: var(--cyan);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+}
+
+
+.answer-area button:hover:not(:disabled) {
+
+    background: var(--cyan);
+
+    color: #001014;
+
+    box-shadow:
+        0 0 20px rgba(0, 229, 255, 0.25);
+}
+
+
+.answer-area button:disabled {
+
+    opacity: 0.35;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   VISSZAJELZÉS
+   ========================================================= */
+
+.feedback {
+
+    min-height: 20px;
+
+    margin-top: 10px;
+
+    font-size: 10px;
+
+    letter-spacing: 0.5px;
+}
+
+
+.feedback.success {
+
+    color: var(--green);
+
+    text-shadow:
+        0 0 8px rgba(0, 255, 136, 0.4);
+}
+
+
+.feedback.error {
+
+    color: var(--red);
+
+    text-shadow:
+        0 0 8px rgba(255, 59, 92, 0.35);
+}
+
+
+/* =========================================================
+   JOBB OLDALI KONZOL
+   ========================================================= */
+
+.security-console {
+
+    position: sticky;
+
+    top: 20px;
+
+    height: calc(100vh - 40px);
+
+    min-height: 650px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+
+/* =========================================================
+   TERMINÁL
+   ========================================================= */
+
+.terminal-panel {
+
+    flex: 1;
+
+    min-height: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border:
+        1px solid rgba(0, 229, 255, 0.25);
+
+    background:
+        #03070b;
+
+    box-shadow:
+        var(--shadow);
+}
+
+
+.terminal-header {
+
+    height: 43px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 0 13px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    background:
+        #091019;
+
+    font-size: 9px;
+}
+
+
+.dots {
+
+    display: flex;
+
+    gap: 5px;
+
+    margin-right: 4px;
+}
+
+
+.dots i {
+
+    width: 7px;
+
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #4c5a63;
+}
+
+
+.dots i:first-child {
+    background: #ff4b5c;
+}
+
+
+.dots i:nth-child(2) {
+    background: #ffc400;
+}
+
+
+.dots i:nth-child(3) {
+    background: #00ff88;
+}
+
+
+.terminal-title {
+
+    color: #9eabb3;
+
+    flex: 1;
+}
+
+
+.terminal-secure {
+
+    color: var(--green);
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   TERMINÁL TARTALMA
+   ========================================================= */
+
+.terminal {
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow-y: auto;
+
+    padding: 15px;
+
+    color: #91aab5;
+
+    font-size: 10px;
+
+    line-height: 1.9;
+}
+
+
+.terminal::-webkit-scrollbar {
+
+    width: 4px;
+}
+
+
+.terminal::-webkit-scrollbar-thumb {
+
+    background: #16404a;
+}
+
+
+.terminal-line {
+
+    animation:
+        terminalAppear 0.25s ease-out;
+}
+
+
+@keyframes terminalAppear {
+
+    from {
+        opacity: 0;
+        transform: translateX(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+.terminal-line.success {
+
+    color: var(--green);
+}
+
+
+.terminal-line.error {
+
+    color: var(--red);
+}
+
+
+.terminal-line.warning {
+
+    color: var(--yellow);
+}
+
+
+.terminal-line.system {
+
+    color: var(--cyan);
+}
+
+
+/* =========================================================
+   TERMINÁL FOOTER
+   ========================================================= */
+
+.terminal-footer {
+
+    height: 34px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 0 12px;
+
+    border-top:
+        1px solid rgba(255, 255, 255, 0.05);
+
+    color: #52646d;
+
+    font-size: 8px;
+
+    letter-spacing: 0.7px;
+}
+
+
+.terminal-prompt {
+
+    color: var(--cyan);
+}
+
+
+.cursor {
+
+    width: 6px;
+
+    height: 12px;
+
+    background: var(--cyan);
+
+    animation: cursorBlink 1s infinite;
+}
+
+
+@keyframes cursorBlink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+
+/* =========================================================
+   DIGITÁLIS LAKAT
+   ========================================================= */
+
+.lock-console {
+
+    position: relative;
+
+    flex-shrink: 0;
+
+    height: 265px;
+
+    overflow: hidden;
+
+    border:
+        1px solid rgba(0, 229, 255, 0.25);
+
+    background:
+        linear-gradient(
+            145deg,
+            #111b23,
+            #070c11
+        );
+
+    box-shadow:
+        0 0 30px rgba(0, 229, 255, 0.05);
+
+    transition: 0.5s;
+}
+
+
+.lock-console-header {
+
+    height: 39px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 0 13px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 9px;
+
+    letter-spacing: 1.5px;
+}
+
+
+.lock-console-header span {
+
+    color: #9baab3;
+}
+
+
+.lock-console-header strong {
+
+    color: var(--red);
+
+    font-size: 8px;
+}
+
+
+.lock-console.unlocked {
+
+    border-color:
+        rgba(0, 255, 136, 0.5);
+
+    box-shadow:
+        0 0 35px rgba(0, 255, 136, 0.12);
+}
+
+
+.lock-console.unlocked
+.lock-console-header strong {
+
+    color: var(--green);
+}
+
+
+/* =========================================================
+   LAKAT TEST
+   ========================================================= */
+
+.lock-console-body {
+
+    position: relative;
+
+    height: calc(100% - 39px);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+.lock {
+
+    position: relative;
+
+    z-index: 2;
+
+    width: 92%;
+
+    padding: 15px;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.07);
+
+    background:
+        rgba(0, 0, 0, 0.2);
+}
+
+
+/* =========================================================
+   KENGYEL
+   ========================================================= */
+
+.lock-shackle {
+
+    position: absolute;
+
+    width: 105px;
+
+    height: 70px;
+
+    top: 9px;
+
+    left: 50%;
+
+    transform:
+        translateX(-50%)
+        rotate(0deg);
+
+    border:
+        8px solid #596a73;
+
+    border-bottom: none;
+
+    border-radius:
+        60px 60px 0 0;
+
+    z-index: 1;
+
+    transition:
+        transform 0.8s ease,
+        border-color 0.5s,
+        filter 0.5s;
+}
+
+
+.lock-console.unlocked
+.lock-shackle {
+
+    transform:
+        translateX(-50%)
+        translateY(-25px)
+        rotate(-18deg);
+
+    border-color: var(--green);
+
+    filter:
+        drop-shadow(
+            0 0 10px rgba(0, 255, 136, 0.5)
+        );
+}
+
+
+/* =========================================================
+   LAKAT IKON
+   ========================================================= */
+
+.lock-icon {
+
+    position: relative;
+
+    text-align: center;
+
+    margin-bottom: 10px;
+
+    font-size: 23px;
+
+    filter:
+        grayscale(0.7);
+
+    transition: 0.5s;
+}
+
+
+.lock-console.unlocked
+.lock-icon {
+
+    filter:
+        grayscale(0);
+
+    transform: scale(1.08);
+}
+
+
+/* =========================================================
+   DIGITEK
+   ========================================================= */
+
+.digits {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(6, 1fr);
+
+    gap: 7px;
+}
+
+
+.digit {
+
+    position: relative;
+
+    height: 55px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    border:
+        1px solid rgba(255, 255, 255, 0.12);
+
+    background:
+        #05090d;
+
+    color: #44545c;
+
+    transition:
+        0.4s;
+}
+
+
+.digit span {
+
+    font-size: 7px;
+
+    color: #4c5b63;
+
+    margin-bottom: 3px;
+}
+
+
+.digit b {
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 15px;
+
+    color: #66767e;
+}
+
+
+.digit.unlocked {
+
+    border-color:
+        rgba(0, 255, 136, 0.65);
+
+    background:
+        rgba(0, 255, 136, 0.06);
+
+    color: var(--green);
+
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 0 15px rgba(0, 255, 136, 0.15);
+}
+
+
+.digit.unlocked span {
+
+    color:
+        rgba(0, 255, 136, 0.65);
+}
+
+
+.digit.unlocked b {
+
+    color: var(--green);
+
+    text-shadow:
+        0 0 10px rgba(0, 255, 136, 0.6);
+}
+
+
+/* =========================================================
+   LAKAT ÜZENET
+   ========================================================= */
+
+.lock-message {
+
+    margin-top: 12px;
+
+    text-align: center;
+
+    color: #596b74;
+
+    font-size: 8px;
+
+    letter-spacing: 1.5px;
+}
+
+
+.lock-console.unlocked
+.lock-message {
+
+    color: var(--green);
+
+    text-shadow:
+        0 0 8px rgba(0, 255, 136, 0.5);
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.page-footer {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-top: 30px;
+
+    padding-top: 17px;
+
+    border-top:
+        1px solid rgba(0, 229, 255, 0.12);
+
+    color: #455761;
+
+    font-size: 8px;
+
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   SIKER MODAL
+   ========================================================= */
+
+.success-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        rgba(0, 4, 7, 0.88);
+
+    backdrop-filter:
+        blur(7px);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition:
+        opacity 0.35s,
+        visibility 0.35s;
+
+    z-index: 500;
+}
+
+
+.success-modal.show {
+
+    opacity: 1;
+
+    visibility: visible;
+}
+
+
+.success-box {
+
+    width: min(500px, 100%);
+
+    padding: 40px 35px;
+
+    text-align: center;
+
+    border:
+        1px solid rgba(0, 255, 136, 0.45);
+
+    background:
+        linear-gradient(
+            145deg,
+            #0d1918,
+            #050b0d
+        );
+
+    box-shadow:
+        0 0 60px rgba(0, 255, 136, 0.12);
+
+    transform: scale(0.9);
+
+    transition: transform 0.4s;
+}
+
+
+.success-modal.show
+.success-box {
+
+    transform: scale(1);
+}
+
+
+.success-icon {
+
+    width: 70px;
+
+    height: 70px;
+
+    margin: 0 auto 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border:
+        2px solid var(--green);
+
+    border-radius: 50%;
+
+    color: var(--green);
+
+    font-size: 32px;
+
+    box-shadow:
+        0 0 30px rgba(0, 255, 136, 0.2);
+}
+
+
+.success-label {
+
+    color: var(--green);
+
+    font-size: 9px;
+
+    letter-spacing: 3px;
+
+    margin-bottom: 12px;
+}
+
+
+.success-box h2 {
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 28px;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 15px;
+}
+
+
+.success-box h2 span {
+
+    color: var(--cyan);
+}
+
+
+.success-box p {
+
+    color: #a9bac2;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+
+    margin-bottom: 20px;
+}
+
+
+.success-code {
+
+    display: inline-block;
+
+    padding: 10px 15px;
+
+    border:
+        1px solid rgba(0, 255, 136, 0.3);
+
+    color: var(--green);
+
+    background:
+        rgba(0, 255, 136, 0.05);
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+}
+
+
+.success-divider {
+
+    height: 1px;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    margin: 25px 0;
+}
+
+
+.success-box button {
+
+    height: 43px;
+
+    padding: 0 25px;
+
+    border:
+        1px solid var(--cyan);
+
+    background:
+        rgba(0, 229, 255, 0.05);
+
+    color: var(--cyan);
+
+    font-family: "Orbitron", sans-serif;
+
+    font-size: 9px;
+
+    letter-spacing: 1px;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+}
+
+
+.success-box button:hover {
+
+    background: var(--cyan);
+
+    color: #001014;
+
+    box-shadow:
+        0 0 25px rgba(0, 229, 255, 0.25);
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .game-layout {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .security-console {
+
+        position: sticky;
+
+        top: 15px;
+
+        height: 650px;
+
+        min-height: 650px;
+
+        order: -1;
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBIL
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+    .page {
+
+        width: 94%;
+
+        padding-top: 18px;
+
+    }
+
+
+    .hero-top {
+
+        align-items: flex-start;
+
+        gap: 10px;
+
+        flex-direction: column;
+
+    }
+
+
+    .hero-content {
+
+        gap: 14px;
+
+    }
+
+
+    .hero-icon {
+
+        width: 55px;
+
+        height: 55px;
+
+        font-size: 18px;
+
+    }
+
+
+    .eyebrow {
+
+        font-size: 8px;
+
+        letter-spacing: 2px;
+
+    }
+
+
+    h1 {
+
+        font-size: 40px;
+
+    }
+
+
+    .hero-subtitle {
+
+        font-size: 10px;
+
+        letter-spacing: 3px;
+
+    }
+
+
+    .mission-box {
+
+        font-size: 11px;
+
+    }
+
+
+    .security-console {
+
+        position: relative;
+
+        top: auto;
+
+        height: 620px;
+
+        min-height: 620px;
+
+    }
+
+
+    .answer-area {
+
+        flex-direction: column;
+
+    }
+
+
+    .answer-area button {
+
+        height: 43px;
+
+        width: 100%;
+
+    }
+
+
+    .digits {
+
+        gap: 4px;
+
+    }
+
+
+    .digit {
+
+        height: 48px;
+
+    }
+
+
+    .digit b {
+
+        font-size: 11px;
+
+    }
+
+
+    .digit span {
+
+        font-size: 6px;
+
+    }
+
+
+    .page-footer {
+
+        flex-direction: column;
+
+        text-align: center;
+
+    }
+
+}
+
+
+/* =========================================================
+   EXTRA SMALL
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .security-console {
+
+        height: 600px;
+
+        min-height: 600px;
+
+    }
+
+
+    .lock-console {
+
+        height: 235px;
+
+    }
+
+
+    .lock {
+
+        width: 96%;
+
+        padding: 10px;
+
+    }
+
+
+    .digit {
+
+        height: 43px;
+
+    }
+
+
+    .digit b {
+
+        font-size: 10px;
+
+    }
+
+
+    .lock-message {
+
+        font-size: 7px;
+
+    }
+
+}
