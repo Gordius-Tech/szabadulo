@@ -16,6 +16,25 @@
     allowfullscreen>
   </iframe>
 </div>
-    <h1><a href="01_binary_grid.html">START</a></h1>
-</body>
+<div>
+  <input type="password" id="kod" placeholder="Add meg a belépési kódot">
+  <button onclick="belepes()">Belépés</button>
+</div>
+
+<div id="start" style="display: none;">
+  <h1><a href="01_binary_grid.html">START</a></h1>
+</div>
+
+<script>
+  function belepes() {
+    const kod = document.getElementById("kod").value;
+
+    if (kod === "rfkv1234") {
+      document.getElementById("start").style.display = "block";
+    } else {
+      alert("Hibás kód!");
+      document.getElementById("start").style.display = "none";
+    }
+  }
+</script></body>
 </html>
