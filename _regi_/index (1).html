@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Rákóczi Ekultúra Kupa 2.0 – LEVEL UP IT szabadulószoba"
+    >
+
+    <title>
+        Rákóczi Ekultúra Kupa 2.0 – LEVEL UP
+    </title>
+
+    <!-- GOOGLE FONT -->
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- SAJÁT CSS -->
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         HÁTTÉR / DEKORÁCIÓ
+         ===================================================== -->
+
+    <div class="background-grid"></div>
+
+    <div class="scanline"></div>
+
+
+    <!-- =====================================================
+         FŐ TARTALOM
+         ===================================================== -->
+
+    <main class="page">
+
+
+        <!-- =================================================
+             FEJLÉC
+             ================================================= -->
+
+        <header class="hero">
+
+            <div class="hero-top">
+
+                <div class="school-tag">
+                    KISVÁRDAI SZC
+                </div>
+
+                <div class="security-status">
+                    <span class="status-dot"></span>
+                    SECURE CONNECTION
+                </div>
+
+            </div>
+
+
+            <div class="hero-content">
+
+                <div class="hero-icon">
+                    &gt;_
+                </div>
+
+                <div>
+
+                    <div class="eyebrow">
+                        RÁKÓCZI EKULTÚRA KUPA 2.0
+                    </div>
+
+                    <h1>
+                        LEVEL <span>UP</span>
+                    </h1>
+
+                    <p class="hero-subtitle">
+                        IT SZABADULÓSZOBA
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="mission-box">
+
+                <div class="mission-icon">
+                    ⚠
+                </div>
+
+                <div>
+
+                    <strong>
+                        KÜLDETÉS:
+                    </strong>
+
+                    <span>
+                        Törd fel a rendszert, oldd meg mind a 6 biztonsági szintet,
+                        és állítsd helyre a rendszert!
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             KÉT HASÁB
+             ================================================= -->
+
+        <div class="game-layout">
+
+
+            <!-- =================================================
+                 BAL OLDAL – FELADATOK
+                 ================================================= -->
+
+            <section class="tasks-area">
+
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <span class="section-label">
+                            MISSION CONTROL
+                        </span>
+
+                        <h2>
+                            BIZTONSÁGI SZINTEK
+                        </h2>
+
+                    </div>
+
+                    <div class="level-counter">
+                        6 LEVEL
+                    </div>
+
+                </div>
+
+
+
+                <!-- =============================================
+                     FELADATOK HELYE
+                     A JavaScript ide generálja a 6 szintet.
+                     ============================================= -->
+
+                <div
+                    id="levels"
+                    class="levels-container"
+                ></div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 JOBB OLDAL – TERMINÁL + LAKAT
+                 ================================================= -->
+
+            <aside class="security-console">
+
+
+                <!-- =============================================
+                     TERMINÁL
+                     ============================================= -->
+
+                <div class="terminal-panel">
+
+
+                    <div class="terminal-header">
+
+                        <div class="dots">
+
+                            <i></i>
+                            <i></i>
+                            <i></i>
+
+                        </div>
+
+
+                        <span class="terminal-title">
+                            root@rakoczi-secure:~
+                        </span>
+
+
+                        <strong class="terminal-secure">
+                            ● SECURE
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- TERMINÁL TARTALMA -->
+
+                    <div
+                        class="terminal"
+                        id="terminal"
+                    ></div>
+
+
+
+                    <!-- TERMINÁL ALSÓ SÁV -->
+
+                    <div class="terminal-footer">
+
+                        <span class="terminal-prompt">
+                            &gt;
+                        </span>
+
+                        <span class="cursor"></span>
+
+                        <span>
+                            AWAITING USER ACTION
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =============================================
+                     DIGITÁLIS LAKAT
+                     ============================================= -->
+
+                <div class="lock-console">
+
+
+                    <!-- LAKAT FEJLÉC -->
+
+                    <div class="lock-console-header">
+
+                        <span>
+                            SECURITY LOCK
+                        </span>
+
+                        <strong id="lockStatus">
+                            ● LOCKED
+                        </strong>
+
+                    </div>
+
+
+
+                    <!-- LAKAT TEST -->
+
+                    <div class="lock-console-body">
+
+
+                        <!-- LAKAT KENGYEL -->
+
+                        <div class="lock-shackle"></div>
+
+
+
+                        <div class="lock">
+
+
+                            <!-- LAKAT IKON -->
+
+                            <div
+                                class="lock-icon"
+                                id="lockIcon"
+                            >
+                                🔒
+                            </div>
+
+
+
+                            <!-- HAT DIGIT -->
+
+                            <div class="digits">
+
+
+                                <div
+                                    class="digit"
+                                    id="digit1"
+                                >
+                                    <span>01</span>
+                                    <b>01</b>
+                                </div>
+
+
+                                <div
+                                    class="digit"
+                                    id="digit2"
+                                >
+                                    <span>02</span>
+                                    <b>02</b>
+                                </div>
+
+
+                                <div
+                                    class="digit"
+                                    id="digit3"
+                                >
+                                    <span>03</span>
+                                    <b>03</b>
+                                </div>
+
+
+                                <div
+                                    class="digit"
+                                    id="digit4"
+                                >
+                                    <span>04</span>
+                                    <b>04</b>
+                                </div>
+
+
+                                <div
+                                    class="digit"
+                                    id="digit5"
+                                >
+                                    <span>05</span>
+                                    <b>05</b>
+                                </div>
+
+
+                                <div
+                                    class="digit"
+                                    id="digit6"
+                                >
+                                    <span>06</span>
+                                    <b>06</b>
+                                </div>
+
+
+                            </div>
+
+
+
+                            <!-- ÁLLAPOT -->
+
+                            <div
+                                class="lock-message"
+                                id="lockMessage"
+                            >
+                                0 / 6 SECURITY LEVELS
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </aside>
+
+        </div>
+
+
+
+        <!-- =================================================
+             ALSÓ INFORMÁCIÓS SÁV
+             ================================================= -->
+
+        <footer class="page-footer">
+
+            <div>
+                RÁKÓCZI EKULTÚRA KUPA 2.0
+            </div>
+
+            <div>
+                LEVEL UP • IT SZABADULÓSZOBA
+            </div>
+
+            <div>
+                SYSTEM v2.0
+            </div>
+
+        </footer>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         SIKER MODAL
+         ===================================================== -->
+
+    <div
+        id="successModal"
+        class="success-modal"
+    >
+
+        <div class="success-box">
+
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+
+            <div class="success-label">
+                SECURITY BREACH COMPLETE
+            </div>
+
+
+            <h2>
+                LEVEL UP
+                <span>COMPLETE!</span>
+            </h2>
+
+
+            <p>
+                Gratulálunk!
+                Sikeresen teljesítetted mind a 6 biztonsági szintet.
+            </p>
+
+
+            <div class="success-code">
+                SYSTEM RESTORED
+            </div>
+
+
+            <div class="success-divider"></div>
+
+
+            <button
+                type="button"
+                onclick="closeSuccessModal()"
+            >
+                VISSZA A PÁLYÁRA
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script src="script.js"></script>
+
+
+</body>
+
+</html>
