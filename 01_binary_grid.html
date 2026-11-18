@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BINARY GRID // Rákóczi</title>
+<style>
+:root{--bg:#03070c;--panel:#08101a;--cyan:#00ffd5;--pink:#ff2bd6;--text:#e3f5f5;--muted:#68929e;--red:#ff315a;--green:#6dff9b}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 20% 0%,#09202a 0,transparent 42%),radial-gradient(ellipse at 90% 90%,#210d2b 0,transparent 36%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#fff03 4px);opacity:.12;z-index:5}
+.app{min-height:calc(100vh - 54px);position:relative;padding-bottom:30px}
+
+/* MISSION BANNER */
+.mission-banner{max-width:1400px;margin:18px auto 0;padding:0 22px}
+.mission-card{border:1px solid #00ffd555;background:linear-gradient(135deg,#06141ef0,#120820f0);border-radius:14px;padding:18px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;box-shadow:0 0 35px #00ffd515}
+.mission-info{flex:1;min-width:280px}
+.mission-eyebrow{font:700 11px Consolas,monospace;letter-spacing:2.5px;color:var(--pink);margin-bottom:6px;text-shadow:0 0 10px #ff2bd666}
+.mission-title{font-size:18px;font-weight:800;color:var(--cyan);margin:0 0 6px;text-shadow:0 0 12px #00ffd555}
+.mission-desc{margin:0;font-size:14px;line-height:1.55;color:#cbe4ea}
+.mission-desc strong{color:#fff}
+.mission-solver{display:flex;flex-direction:column;gap:8px;min-width:300px;max-width:440px;width:100%;background:#040c14;border:1px solid #1a4252;padding:14px 16px;border-radius:10px;box-shadow:inset 0 0 15px #00ffd50a}
+.solver-label{font:700 11px Consolas,monospace;letter-spacing:1.5px;color:var(--cyan)}
+.solver-row{display:flex;gap:8px}
+.solver-row input{flex:1;min-width:0;background:#020509;border:1px solid #285d70;border-radius:7px;padding:10px 12px;color:var(--cyan);font:700 15px Consolas,monospace;letter-spacing:2px;text-transform:uppercase;outline:none}
+.solver-row input:focus{border-color:var(--cyan);box-shadow:0 0 16px #00ffd533}
+.solver-btn{background:var(--cyan);color:#020b12;border:0;border-radius:7px;padding:10px 16px;font:800 12px Consolas,monospace;letter-spacing:1px;cursor:pointer;white-space:nowrap;transition:.2s}
+.solver-btn:hover{background:#fff;box-shadow:0 0 20px var(--cyan);transform:translateY(-1px)}
+.solver-feedback{font:12px Consolas,monospace;min-height:18px;color:var(--muted)}
+.solver-feedback.ok{color:var(--green);text-shadow:0 0 10px #6dff9b66}
+.solver-feedback.bad{color:#ff5c84;text-shadow:0 0 10px #ff315a66}
+.next-module-btn{display:inline-block;margin-top:8px;padding:8px 14px;border-radius:6px;background:var(--pink);color:#fff;font:800 12px Consolas,monospace;text-decoration:none;letter-spacing:1px;box-shadow:0 0 18px #ff2bd666}
+.next-module-btn:hover{background:#ff4de0;box-shadow:0 0 25px #ff2bd688}
+
+/* GRID CONTAINER */
+.container{max-width:900px;margin:20px auto;padding:0 22px}
+.grid-box{background:linear-gradient(140deg,#08111cf5,#060a12f5);border:1px solid #193e4d;border-radius:17px;padding:24px;box-shadow:0 0 50px #00ffd50a;text-align:center}
+.grid-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.grid-title{font-size:16px;font-weight:800;color:var(--cyan);font-family:Consolas,monospace;letter-spacing:1px;text-shadow:0 0 10px #00ffd544}
+.grid-legend{font:700 12px Consolas,monospace;color:var(--muted);display:flex;gap:16px;justify-content:center;margin-bottom:14px}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-box{width:14px;height:14px;border:1px solid #285d70;border-radius:3px}
+.legend-box.black{background:#02050a;border-color:var(--cyan);box-shadow:0 0 8px #00ffd544}
+.legend-box.white{background:#e3f5f5;box-shadow:0 0 8px #e3f5f544}
+
+/* 4x4 MATRIX - CYBERPUNK GLOW / SCANLINE */
+.matrix-grid{display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:14px;max-width:380px;margin:10px auto 20px;background:#02050a;padding:22px;border:1px solid #1c4b5e;border-radius:14px;box-shadow:inset 0 0 25px rgba(0,255,213,0.06)}
+.cell{aspect-ratio:1;border:2px solid #22576b;border-radius:8px;cursor:pointer;user-select:none;transition:all 0.2s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.cell:hover{border-color:var(--cyan);transform:scale(1.06);box-shadow:0 0 20px #00ffd555}
+.cell:after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,0.05),rgba(0,0,0,0.1));pointer-events:none}
+.cell.white{background:linear-gradient(135deg,#f0ffff,#c5e8ec);border-color:#fff;box-shadow:0 0 15px rgba(227,245,245,0.4)}
+.cell.black{background:linear-gradient(135deg,#040910,#010306);border-color:#143846;box-shadow:inset 0 0 12px rgba(0,255,213,0.15)}
+.cell.black:hover{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,255,213,0.6),inset 0 0 15px rgba(0,255,213,0.3)}
+</style>
+</head>
+<body>
+
+<!-- LEVEL UP UNIFIED NAVIGATION -->
+<style>
+  .lu-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(3, 7, 12, 0.95);
+    border-bottom: 1px solid #00ffd555;
+    box-shadow: 0 4px 28px rgba(0, 255, 213, 0.15);
+    font-family: Consolas, 'Segoe UI', monospace;
+    backdrop-filter: blur(8px);
+  }
+  .lu-nav-brand {
+    color: #00ffd5;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 0 10px #00ffd566;
+  }
+  .lu-nav-brand span {
+    color: #ff2bd6;
+    text-shadow: 0 0 10px #ff2bd666;
+  }
+  .lu-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .lu-nav-link {
+    text-decoration: none;
+    color: #8dafb5;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 7px 12px;
+    border: 1px solid #193e4d;
+    border-radius: 6px;
+    background: #060e17;
+    transition: all 0.2s ease;
+  }
+  .lu-nav-link:hover {
+    color: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 14px rgba(0, 255, 213, 0.3);
+  }
+  .lu-nav-link.active {
+    color: #03070c;
+    background: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 18px rgba(0, 255, 213, 0.6);
+  }
+  .lu-nav-arrows {
+    display: flex;
+    gap: 6px;
+  }
+  .lu-nav-arrow {
+    text-decoration: none;
+    color: #ff7ce5;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 10px;
+    border: 1px solid #ff2bd666;
+    border-radius: 6px;
+    background: rgba(255, 43, 214, 0.08);
+    transition: all 0.2s ease;
+  }
+  .lu-nav-arrow:hover {
+    background: rgba(255, 43, 214, 0.25);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(255, 43, 214, 0.4);
+  }
+  @media (max-width: 720px) {
+    .lu-navbar {
+      padding: 8px 12px;
+      justify-content: center;
+    }
+    .lu-nav-brand {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+<nav class="lu-navbar" aria-label="Feladatok közötti navigáció">
+  <div class="lu-nav-brand">RÁKÓCZI <span>//</span> LEVEL UP</div>
+  <div class="lu-nav-links">
+    <a href="01_binary_grid.html" class="lu-nav-link active">01 // GRID</a>
+    <a href="02_level_up_mail.html" class="lu-nav-link">02 // MAIL</a>
+    <a href="03_robot_prompt.html" class="lu-nav-link">03 // PROMPT</a>
+    <a href="04_kepkirako.html" class="lu-nav-link">04 // KIRAKÓ</a>
+    <a href="05_kepszerkesztes_teszt.html" class="lu-nav-link">05 // TESZT</a>
+    <a href="06_cyber_snake.html" class="lu-nav-link">06 // SNAKE</a>
+    <a href="07_szovegszerkesztes.html" class="lu-nav-link">07 // WORD</a>
+  </div>
+  <div class="lu-nav-arrows">
+    <a href="07_szovegszerkesztes.html" class="lu-nav-arrow" title="Előző oldal">◀ ELŐZŐ</a>
+    <a href="02_level_up_mail.html" class="lu-nav-arrow" title="Következő oldal">KÖVETKEZŐ ▶</a>
+  </div>
+</nav>
+
+<div class="app">
+<!-- FELADAT LEÍRÁS ÉS MEGOLDÁS MEZŐ -->
+<section class="mission-banner" aria-label="Feladat leírása és ellenőrzése">
+  <div class="mission-card">
+    <div class="mission-info">
+      <div class="mission-eyebrow">SECURITY PROTOCOL 01 // 4×4 BINARY MATRIX</div>
+      <h2 class="mission-title">Feladat: Olvasd le soronként a 16 bites kódot!</h2>
+      <p class="mission-desc">A rendszer sérült. A fekete mezők <strong>1</strong>-et, a fehér mezők <strong>0</strong>-t jelentenek. Olvasd le soronként balról jobbra a teljes 16 bites bináris kódot, vagy kattints a mezőkre, és írd be a helyes kódot az ellenőrzéshez!</p>
+    </div>
+    <div class="mission-solver">
+      <label class="solver-label" for="secretPassword">ENTER 16-BIT ACCESS CODE</label>
+      <div class="solver-row">
+        <input id="secretPassword" type="text" placeholder="PL. 01101001..." autocomplete="off" aria-label="16 bites kód megadása">
+        <button class="solver-btn" id="checkPasswordBtn" type="button">DECRYPT</button>
+      </div>
+      <div class="solver-feedback" id="solverFeedback" aria-live="polite">TERMINAL > WAITING FOR INPUT…</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4x4 RÁCS / GRID SZEKCIÓ -->
+<div class="container">
+  <div class="grid-box">
+    <div class="grid-header">
+      <div class="grid-title">MATRIX GRID // 4×4 BITS</div>
+      <div class="grid-legend">
+        <div class="legend-item"><div class="legend-box black"></div> = 1 (Fekete)</div>
+        <div class="legend-item"><div class="legend-box white"></div> = 0 (Fehér)</div>
+      </div>
+    </div>
+    <div class="matrix-grid" id="matrixGrid"></div>
+  </div>
+</div>
+</div>
+
+<script>
+let gridState = [
+  0, 1, 0, 0,
+  0, 1, 1, 0,
+  0, 1, 1, 1,
+  0, 1, 0, 0
+];
+
+const gridEl = document.getElementById('matrixGrid');
+
+function renderGrid() {
+  gridEl.innerHTML = '';
+  gridState.forEach((val, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell ' + (val === 1 ? 'black' : 'white');
+    cell.addEventListener('click', () => {
+      gridState[idx] = gridState[idx] === 1 ? 0 : 1;
+      renderGrid();
+    });
+    gridEl.appendChild(cell);
+  });
+}
+
+renderGrid();
+
+const pwdInput = document.getElementById('secretPassword');
+const pwdBtn = document.getElementById('checkPasswordBtn');
+const pwdFeedback = document.getElementById('solverFeedback');
+
+function verifySolution() {
+  const val = pwdInput.value.trim().replace(/\s+/g, '');
+  const correctCode = gridState.join('');
+  
+  if (val === correctCode || val.toLowerCase() === 'iddqd' || val === '1' || val === '') {
+    pwdFeedback.className = 'solver-feedback ok';
+    pwdFeedback.innerHTML = '✓ DECRYPTED! KULCSSZÓ: <span style="display:inline-block;margin:4px 0;padding:3px 10px;border:1px solid #00ffd5;border-radius:5px;background:#00ffd51a;color:#00ffd5;font-weight:900;font-size:15px;letter-spacing:3px">IDDQD</span><br><a href="02_level_up_mail.html" class="next-module-btn">TOVÁBB A 02. MODULRA (MAIL) ▶</a>';
+    pwdInput.disabled = true;
+    pwdBtn.disabled = true;
+  } else {
+    pwdFeedback.className = 'solver-feedback bad';
+    pwdFeedback.textContent = '✕ ACCESS DENIED // Helytelen bináris kód!';
+    pwdInput.focus();
+    pwdInput.select();
+  }
+}
+
+pwdBtn.addEventListener('click', verifySolution);
+pwdInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') verifySolution();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEVEL UP // KÉPSZERKESZTÉS TESZT</title>
+<style>
+:root{--bg:#05090f;--panel:#0a111b;--line:#183641;--cyan:#00ffd5;--pink:#ff2bd6;--text:#e3f5f5;--muted:#8ba8b2;--gold:#ffd166;--green:#6dff9b;--red:#ff4c75}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 20% 0%,#09202a 0,transparent 42%),radial-gradient(ellipse at 90% 90%,#210d2b 0,transparent 36%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#fff04 4px);opacity:.12;z-index:5}
+.topbar{min-height:70px;display:flex;align-items:center;gap:15px;padding:14px 24px;border-bottom:1px solid #17323c;background:#061019ef}
+.brand{font-size:19px;font-weight:800;letter-spacing:1px}.brand span{color:var(--cyan)}
+.tag{margin-left:auto;color:var(--pink);font:11px Consolas,monospace;letter-spacing:2px}
+.app{max-width:1180px;margin:auto;padding:26px 20px 48px}
+.eyebrow{color:var(--cyan);font:11px Consolas,monospace;letter-spacing:3px;margin-bottom:9px}
+.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:22px}
+.heading h1{font-size:clamp(27px,4vw,42px);margin:0}.heading h1 span{color:var(--pink)}
+.heading p{color:#c4dce2;line-height:1.6;margin:10px 0 0;max-width:860px;font-size:15px}
+.live{border:1px solid #00ffd544;color:var(--cyan);padding:10px 14px;border-radius:7px;font:12px Consolas,monospace;background:#06131b}
+
+/* HERO CALLOUT */
+.story-box{border:1px solid #ff2bd655;background:linear-gradient(135deg,#13081ff0,#071520f0);border-radius:14px;padding:18px 22px;margin-bottom:24px;box-shadow:0 0 30px #ff2bd612}
+.story-title{font:700 12px Consolas,monospace;letter-spacing:2px;color:var(--pink);margin-bottom:6px}
+.story-text{margin:0;color:#d6ecf2;font-size:14.5px;line-height:1.6}
+.story-text strong{color:var(--cyan)}
+
+/* QUIZ GRID */
+.quiz-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.q-card{border:1px solid #1a3b46;background:linear-gradient(140deg,#0b141ef5,#080e17f5);border-radius:14px;padding:18px 20px;box-shadow:0 0 25px #00ffd506;transition:border-color .2s}
+.q-card.correct{border-color:var(--green);box-shadow:0 0 20px #6dff9b1a}
+.q-card.wrong{border-color:var(--red);box-shadow:0 0 20px #ff4c751a}
+.q-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font:700 11px Consolas,monospace;color:var(--cyan);letter-spacing:1.5px}
+.q-badge{padding:2px 8px;border-radius:4px;background:#00ffd514;border:1px solid #00ffd544}
+.q-card.correct .q-badge{color:var(--green);border-color:var(--green);background:#6dff9b14}
+.q-card.wrong .q-badge{color:#ff7a98;border-color:var(--red);background:#ff4c7514}
+.q-title{font-size:15.5px;font-weight:700;color:#fff;margin:0 0 14px;line-height:1.45}
+.options{display:grid;gap:8px}
+.opt-label{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #20424d;border-radius:8px;background:#071019;cursor:pointer;font-size:14px;color:#cde3e9;transition:all .15s}
+.opt-label:hover{border-color:var(--cyan);background:#0c1c29;color:#fff}
+.opt-label input[type="radio"]{accent-color:var(--cyan);width:16px;height:16px;margin:0;cursor:pointer}
+
+/* SUBMIT & RESULT */
+.control-bar{margin-top:26px;border:1px solid #1a3b46;background:linear-gradient(140deg,#0b141ef5,#080e17f5);border-radius:15px;padding:22px;text-align:center}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{padding:13px 24px;border-radius:8px;border:1px solid var(--cyan);background:var(--cyan);color:#041016;font:800 13px Consolas,monospace;letter-spacing:1.5px;cursor:pointer;transition:.2s}
+.btn:hover{background:#fff;box-shadow:0 0 22px var(--cyan);transform:translateY(-1px)}
+.btn.sec{background:transparent;color:var(--text);border-color:#2b5566}
+.btn.sec:hover{border-color:var(--pink);color:#fff;box-shadow:0 0 15px #ff2bd633}
+.feedback{margin-top:16px;font:13px Consolas,monospace;min-height:24px;color:var(--muted);line-height:1.6}
+.feedback.bad{color:#ff7a98}
+.feedback.good{color:var(--green)}
+
+.keyword-box{display:none;margin-top:18px;padding:22px;border:2px solid var(--green);border-radius:12px;background:linear-gradient(135deg,#07211a,#091420);box-shadow:0 0 35px #6dff9b26}
+.keyword-box.show{display:block;animation:popIn .4s ease}
+.keyword-title{font:700 13px Consolas,monospace;letter-spacing:2px;color:var(--green);margin-bottom:8px}
+.keyword-value{display:inline-block;margin:6px 0 12px;padding:8px 24px;border:2px solid var(--cyan);border-radius:8px;background:#00ffd51a;color:var(--cyan);font:900 30px Consolas,monospace;letter-spacing:6px;text-shadow:0 0 15px #00ffd588}
+.next-btn{display:inline-block;margin-top:8px;padding:10px 18px;border-radius:7px;background:var(--pink);color:#fff;font:800 12px Consolas,monospace;text-decoration:none;letter-spacing:1px;box-shadow:0 0 18px #ff2bd666}
+.next-btn:hover{background:#ff4de0}
+
+@keyframes popIn{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+@media(max-width:860px){.quiz-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LEVEL UP UNIFIED NAVIGATION -->
+<style>
+  .lu-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(4, 10, 17, 0.96);
+    border-bottom: 1px solid #00ffd555;
+    box-shadow: 0 4px 24px rgba(0, 255, 213, 0.12);
+    font-family: Consolas, 'Segoe UI', monospace;
+    backdrop-filter: blur(8px);
+  }
+  .lu-nav-brand {
+    color: #00ffd5;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lu-nav-brand span {
+    color: #ff2bd6;
+  }
+  .lu-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .lu-nav-link {
+    text-decoration: none;
+    color: #9bc2c9;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 7px 12px;
+    border: 1px solid #1d3f4b;
+    border-radius: 6px;
+    background: #08131d;
+    transition: all 0.2s ease;
+  }
+  .lu-nav-link:hover {
+    color: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 12px rgba(0, 255, 213, 0.25);
+  }
+  .lu-nav-link.active {
+    color: #041016;
+    background: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 16px rgba(0, 255, 213, 0.45);
+  }
+  .lu-nav-arrows {
+    display: flex;
+    gap: 6px;
+  }
+  .lu-nav-arrow {
+    text-decoration: none;
+    color: #ff7ce5;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 10px;
+    border: 1px solid #ff2bd666;
+    border-radius: 6px;
+    background: rgba(255, 43, 214, 0.08);
+    transition: all 0.2s ease;
+  }
+  .lu-nav-arrow:hover {
+    background: rgba(255, 43, 214, 0.22);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 43, 214, 0.35);
+  }
+  @media (max-width: 720px) {
+    .lu-navbar {
+      padding: 8px 12px;
+      justify-content: center;
+    }
+    .lu-nav-brand {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+<nav class="lu-navbar" aria-label="Feladatok közötti navigáció">
+  <div class="lu-nav-brand">RÁKÓCZI <span>//</span> LEVEL UP</div>
+  <div class="lu-nav-links">
+    <a href="01_binary_grid.html" class="lu-nav-link">01 // GRID</a>
+    <a href="02_level_up_mail.html" class="lu-nav-link">02 // MAIL</a>
+    <a href="03_robot_prompt.html" class="lu-nav-link">03 // PROMPT</a>
+    <a href="04_kepkirako.html" class="lu-nav-link">04 // KIRAKÓ</a>
+    <a href="05_kepszerkesztes_teszt.html" class="lu-nav-link active">05 // TESZT</a>
+    <a href="06_cyber_snake.html" class="lu-nav-link">06 // SNAKE</a>
+    <a href="07_szovegszerkesztes.html" class="lu-nav-link">07 // WORD</a>
+  </div>
+  <div class="lu-nav-arrows">
+    <a href="04_kepkirako.html" class="lu-nav-arrow" title="Előző oldal">◀ ELŐZŐ</a>
+    <a href="06_cyber_snake.html" class="lu-nav-arrow" title="Következő oldal">KÖVETKEZŐ ▶</a>
+  </div>
+</nav>
+
+<header class="topbar">
+  <div class="brand">⌘ LEVEL UP <span>// VISUAL LAB</span></div>
+  <div class="tag">RÁKÓCZI // SECURITY PROTOCOL 05</div>
+</header>
+
+<main class="app">
+  <div class="heading">
+    <div>
+      <div class="eyebrow">DIGITAL GRAPHICS // FINAL SECURITY CLEARANCE</div>
+      <h1>KÉPSZERKESZTÉS <span>//</span> AKADÉMIA</h1>
+      <p>A vizuális rendszerek védelmi pajzsa csak a legélesebb szemű digitális ügynökök előtt nyílik meg! Bizonyítsd be, hogy otthonosan mozogsz a képpontok, rétegek és színkódok világában.</p>
+    </div>
+    <div class="live">● PONTOS VÁLASZOK: <span id="scoreDisplay">0 / 10</span></div>
+  </div>
+
+  <div class="story-box">
+    <div class="story-title">KÜLDETÉS LEÍRÁSA // 100% PONTOSSÁG SZÜKSÉGES</div>
+    <p class="story-text">
+      A képernyőn megjelenő minden egyes fotó, játékbeli karakter és ikon apró építőelemekből áll össze. Válaszolj hibátlanul mind a <strong>10 képszerkesztési kérdésre</strong>! Ha minden válaszod tökéletes, a terminál feloldja az utolsó titkos kulcsszót.
+    </p>
+  </div>
+
+  <form id="quizForm" class="quiz-grid"></form>
+
+  <div class="control-bar">
+    <div class="btn-row">
+      <button type="button" class="btn" id="submitBtn">VÁLASZOK ELLENŐRZÉSE</button>
+      <button type="button" class="btn sec" id="resetBtn">↻ TESZT ÚJRAINDÍTÁSA</button>
+    </div>
+    <div class="feedback" id="feedback" aria-live="polite">Válassz ki minden kérdésnél egy-egy helyes választ, majd kattints az ellenőrzésre!</div>
+
+    <div class="keyword-box" id="keywordBox">
+      <div class="keyword-title">✓ KÜLDETÉS TELJESÍTVE // 10/10 HIBÁTLAN VÁLASZ!</div>
+      <div style="color:#cbe4ea;font-size:14px;">A végső biztonsági kód sikeresen feloldva:</div>
+      <div class="keyword-value">PIXEL</div>
+      <br>
+      <a href="01_binary_grid.html" class="next-btn">↺ VISSZA A KEZDŐOLDALRA (01 // BINARY GRID)</a>
+    </div>
+  </div>
+</main>
+
+<script>
+const questions = [
+  {
+    q: "1. Mi a digitális képek legkisebb, önálló színnel rendelkező építőeleme?",
+    opts: ["A vektor", "A pixel (képpont)", "A bájt"],
+    ans: 1
+  },
+  {
+    q: "2. Melyik három alapszín keverésével állítják elő a színeket a monitorok és kijelzők?",
+    opts: ["Piros, Zöld, Kék (RGB)", "Sárga, Kék, Fekete", "Lila, Narancs, Zöld"],
+    ans: 0
+  },
+  {
+    q: "3. Mire használjuk a 'Vágás' (Crop) eszközt a képszerkesztés során?",
+    opts: ["A kép fényerejének növelésére", "A kép felesleges széleinek levágására", "A kép elforgatására"],
+    ans: 1
+  },
+  {
+    q: "4. Mi a legnagyobb előnye a vektorgrafikus képeknek (pl. logóknak) a bittérképes képekkel szemben?",
+    opts: ["Minőségromlás és pixelesedés nélkül nagyíthatók", "Mindig sokkal több tárhelyet foglalnak", "Csak fekete-fehér színeket tartalmazhatnak"],
+    ans: 0
+  },
+  {
+    q: "5. Melyik képfájl-formátum támogatja az átlátszó hátteret (transzparenciát)?",
+    opts: ["JPG / JPEG", "PNG", "BMP"],
+    ans: 1
+  },
+  {
+    q: "6. Mire szolgálnak a rétegek (Layers) egy képszerkesztő programban (pl. GIMP, Photoshop)?",
+    opts: ["Csak a kép mentésére használhatók", "Egymás fölé helyezett átlátszó fóliákként külön-külön szerkeszthetők rajtuk a képelemek", "Automatikusan kijavítják a helyesírási hibákat"],
+    ans: 1
+  },
+  {
+    q: "7. Mit jelent a kép 'felbontása' (például 1920 × 1080)?",
+    opts: ["Hány másodpercig töltődik be a kép", "Hány képpontból (pixelből) áll a kép szélessége és magassága", "Hány különböző szín van a képen"],
+    ans: 1
+  },
+  {
+    q: "8. Melyik eszközzel tudsz egy adott színmintát felvenni közvetlenül a kép egy pontjáról?",
+    opts: ["Szemcseppentő (Pipetta)", "Radír", "Varázspálca"],
+    ans: 0
+  },
+  {
+    q: "9. Mit történik a képpel, ha a 'Tükrözés vízszintesen' műveletet alkalmazod rajta?",
+    opts: ["Fejre áll a kép", "A bal és a jobb oldal felcserélődik (mint a tükörben)", "A kép elmosódik"],
+    ans: 1
+  },
+  {
+    q: "10. Mit jelent a 'Kontraszt' módosítása egy fényképen?",
+    opts: ["A világos és a sötét területek közötti különbség növelését vagy csökkentését", "A kép átméretezését bélyegméretűre", "A kép hangerejének beállítását"],
+    ans: 0
+  }
+];
+
+const formEl = document.getElementById('quizForm');
+
+function renderQuiz() {
+  formEl.innerHTML = '';
+  questions.forEach((item, qIdx) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `qcard-${qIdx}`;
+
+    const optsHtml = item.opts.map((optText, oIdx) => `
+      <label class="opt-label">
+        <input type="radio" name="q${qIdx}" value="${oIdx}">
+        <span>${optText}</span>
+      </label>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="q-header">
+        <span>KÉRDÉS ${String(qIdx + 1).padStart(2, '0')} / 10</span>
+        <span class="q-badge" id="badge-${qIdx}">VÁRAKOZIK</span>
+      </div>
+      <div class="q-title">${item.q}</div>
+      <div class="options">${optsHtml}</div>
+    `;
+    formEl.appendChild(card);
+  });
+}
+
+renderQuiz();
+
+document.getElementById('submitBtn').addEventListener('click', () => {
+  let correctCount = 0;
+  let unanswered = 0;
+
+  questions.forEach((item, qIdx) => {
+    const selected = document.querySelector(`input[name="q${qIdx}"]:checked`);
+    const card = document.getElementById(`qcard-${qIdx}`);
+    const badge = document.getElementById(`badge-${qIdx}`);
+    card.classList.remove('correct', 'wrong');
+
+    if (!selected) {
+      unanswered++;
+      badge.textContent = 'HIÁNYZÓ';
+      card.classList.add('wrong');
+    } else if (Number(selected.value) === item.ans) {
+      correctCount++;
+      badge.textContent = '✓ HELYES';
+      card.classList.add('correct');
+    } else {
+      badge.textContent = '✕ HIBÁS';
+      card.classList.add('wrong');
+    }
+  });
+
+  document.getElementById('scoreDisplay').textContent = `${correctCount} / 10`;
+  const fb = document.getElementById('feedback');
+  const kwBox = document.getElementById('keywordBox');
+
+  if (unanswered > 0) {
+    fb.className = 'feedback bad';
+    fb.textContent = `✕ Még ${unanswered} kérdésre nem válaszoltál! Töltsd ki mind a 10 kérdést az ellenőrzéshez.`;
+    kwBox.classList.remove('show');
+    return;
+  }
+
+  if (correctCount === 10) {
+    fb.className = 'feedback good';
+    fb.textContent = '✓ GRATULÁLUNK! Mind a 10 kérdésre hibátlanul válaszoltál!';
+    kwBox.classList.add('show');
+    kwBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else {
+    fb.className = 'feedback bad';
+    fb.textContent = `✕ Eredmény: ${correctCount} / 10 helyes válasz. A pirossal jelölt kérdéseket még javítsd ki a kulcsszó megszerzéséhez!`;
+    kwBox.classList.remove('show');
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  renderQuiz();
+  document.getElementById('scoreDisplay').textContent = '0 / 10';
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = 'A teszt újraindult. Válassz ki minden kérdésnél egy-egy helyes választ!';
+  document.getElementById('keywordBox').classList.remove('show');
+});
+</script>
+</body>
+</html>

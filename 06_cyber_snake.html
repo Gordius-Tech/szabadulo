@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEVEL UP // CYBER SNAKE</title>
+<style>
+:root{--bg:#05090f;--panel:#0a111b;--line:#183641;--cyan:#00ffd5;--pink:#ff2bd6;--text:#e3f5f5;--muted:#8ba8b2;--green:#6dff9b;--red:#ff4c75}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 20% 0%,#09202a 0,transparent 42%),radial-gradient(ellipse at 90% 90%,#210d2b 0,transparent 36%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#fff04 4px);opacity:.12;z-index:5}
+.topbar{min-height:70px;display:flex;align-items:center;gap:15px;padding:14px 24px;border-bottom:1px solid #17323c;background:#061019ef}
+.brand{font-size:19px;font-weight:800;letter-spacing:1px}.brand span{color:var(--cyan)}
+.tag{margin-left:auto;color:var(--pink);font:11px Consolas,monospace;letter-spacing:2px}
+.app{max-width:1180px;margin:auto;padding:26px 20px 48px}
+.eyebrow{color:var(--cyan);font:11px Consolas,monospace;letter-spacing:3px;margin-bottom:9px}
+.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:20px}
+.heading h1{font-size:clamp(27px,4vw,42px);margin:0}.heading h1 span{color:var(--pink)}
+.heading p{color:#c4dce2;line-height:1.6;margin:10px 0 0;max-width:820px;font-size:15px}
+.live{border:1px solid #00ffd544;color:var(--cyan);padding:10px 14px;border-radius:7px;font:12px Consolas,monospace;background:#06131b}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:20px;align-items:start}
+.panel{border:1px solid #1a3b46;background:linear-gradient(140deg,#0b141ef5,#080e17f5);border-radius:15px;padding:20px;box-shadow:0 0 35px #00ffd506}
+.panel h2{font-size:1.1rem;letter-spacing:.08em;margin:0 0 12px;color:var(--cyan)}
+.side-list{display:grid;gap:8px;margin-bottom:16px}
+.item-tag{display:flex;align-items:center;justify-content:space-between;background:#071019;border:1px solid #20424d;padding:8px 12px;border-radius:6px;font:12px Consolas,monospace}
+.item-tag.collected{border-color:var(--green);color:var(--green);background:#6dff9b0c}
+
+/* GAME BOARD */
+.game-area{display:flex;flex-direction:column;align-items:center;gap:14px}
+canvas{background:#03070c;border:2px solid #22576b;border-radius:10px;box-shadow:0 0 30px rgba(0,255,213,0.15);max-width:100%;height:auto}
+.game-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{padding:11px 20px;border-radius:8px;border:1px solid var(--cyan);background:var(--cyan);color:#041016;font:800 12px Consolas,monospace;letter-spacing:1.5px;cursor:pointer;transition:.2s}
+.btn:hover{background:#fff;box-shadow:0 0 20px var(--cyan)}
+.btn.sec{background:transparent;color:var(--text);border-color:#2b5566}
+.btn.sec:hover{border-color:var(--pink);color:#fff}
+
+.instructions-box{font-size:13.5px;line-height:1.6;color:#cbe4ea}
+.instructions-box ul{padding-left:18px;margin:8px 0}
+
+/* WIN BOX */
+.keyword-box{display:none;margin-top:18px;padding:22px;border:2px solid var(--green);border-radius:12px;background:linear-gradient(135deg,#07211a,#091420);box-shadow:0 0 35px #6dff9b26;text-align:center}
+.keyword-box.show{display:block;animation:popIn .4s ease}
+.keyword-title{font:700 13px Consolas,monospace;letter-spacing:2px;color:var(--green);margin-bottom:8px}
+.keyword-value{display:inline-block;margin:6px 0 12px;padding:8px 24px;border:2px solid var(--cyan);border-radius:8px;background:#00ffd51a;color:var(--cyan);font:900 30px Consolas,monospace;letter-spacing:6px;text-shadow:0 0 15px #00ffd588}
+.next-btn{display:inline-block;margin-top:8px;padding:10px 18px;border-radius:7px;background:var(--pink);color:#fff;font:800 12px Consolas,monospace;text-decoration:none;letter-spacing:1px;box-shadow:0 0 18px #ff2bd666}
+.next-btn:hover{background:#ff4de0}
+
+@keyframes popIn{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LEVEL UP UNIFIED NAVIGATION -->
+<style>
+  .lu-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(4, 10, 17, 0.96);
+    border-bottom: 1px solid #00ffd555;
+    box-shadow: 0 4px 24px rgba(0, 255, 213, 0.12);
+    font-family: Consolas, 'Segoe UI', monospace;
+    backdrop-filter: blur(8px);
+  }
+  .lu-nav-brand {
+    color: #00ffd5;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lu-nav-brand span {
+    color: #ff2bd6;
+  }
+  .lu-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .lu-nav-link {
+    text-decoration: none;
+    color: #9bc2c9;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 7px 12px;
+    border: 1px solid #1d3f4b;
+    border-radius: 6px;
+    background: #08131d;
+    transition: all 0.2s ease;
+  }
+  .lu-nav-link:hover {
+    color: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 12px rgba(0, 255, 213, 0.25);
+  }
+  .lu-nav-link.active {
+    color: #041016;
+    background: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 16px rgba(0, 255, 213, 0.45);
+  }
+  .lu-nav-arrows {
+    display: flex;
+    gap: 6px;
+  }
+  .lu-nav-arrow {
+    text-decoration: none;
+    color: #ff7ce5;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 10px;
+    border: 1px solid #ff2bd666;
+    border-radius: 6px;
+    background: rgba(255, 43, 214, 0.08);
+    transition: all 0.2s ease;
+  }
+  .lu-nav-arrow:hover {
+    background: rgba(255, 43, 214, 0.22);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 43, 214, 0.35);
+  }
+  @media (max-width: 720px) {
+    .lu-navbar {
+      padding: 8px 12px;
+      justify-content: center;
+    }
+    .lu-nav-brand {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+<nav class="lu-navbar" aria-label="Feladatok közötti navigáció">
+  <div class="lu-nav-brand">RÁKÓCZI <span>//</span> LEVEL UP</div>
+  <div class="lu-nav-links">
+    <a href="01_binary_grid.html" class="lu-nav-link">01 // GRID</a>
+    <a href="02_level_up_mail.html" class="lu-nav-link">02 // MAIL</a>
+    <a href="03_robot_prompt.html" class="lu-nav-link">03 // PROMPT</a>
+    <a href="04_kepkirako.html" class="lu-nav-link">04 // KIRAKÓ</a>
+    <a href="05_kepszerkesztes_teszt.html" class="lu-nav-link">05 // TESZT</a>
+    <a href="06_cyber_snake.html" class="lu-nav-link active">06 // SNAKE</a>
+    <a href="07_szovegszerkesztes.html" class="lu-nav-link">07 // WORD</a>
+  </div>
+  <div class="lu-nav-arrows">
+    <a href="05_kepszerkesztes_teszt.html" class="lu-nav-arrow" title="Előző oldal">◀ ELŐZŐ</a>
+    <a href="07_szovegszerkesztes.html" class="lu-nav-arrow" title="Következő oldal">KÖVETKEZŐ ▶</a>
+  </div>
+</nav>
+
+<header class="topbar">
+  <div class="brand">⌘ LEVEL UP <span>// CYBER SNAKE</span></div>
+  <div class="tag">RÁKÓCZI // SECURITY PROTOCOL 06</div>
+</header>
+
+<main class="app">
+  <div class="heading">
+    <div>
+      <div class="eyebrow">CYBERPUNK ARCADE // DATA COLLECTION</div>
+      <h1>CYBER <span>//</span> SNAKE</h1>
+      <p>Irányítsd a kiber-kígyót a nyílbillentyűkkel vagy a képernyőgombokkal! Gyűjtsd össze mind a 8 IT-s ereklyét és protokollt a hálózaton, hogy feltörd a rendszert.</p>
+    </div>
+    <div class="live">● ÖSSZEGYŰJTVE: <span id="scoreVal">0 / 8</span></div>
+  </div>
+
+  <div class="layout">
+    <!-- JÁTÉK TÉR -->
+    <div class="panel game-area">
+      <canvas id="snakeCanvas" width="500" height="500"></canvas>
+      <div class="game-controls">
+        <button class="btn" id="startBtn">JÁTÉK INDÍTÁSA</button>
+        <button class="btn sec" id="pauseBtn">SZÜNET</button>
+      </div>
+      <div class="keyword-box" id="keywordBox">
+        <div class="keyword-title">✓ KÜLDETÉS TELJESÍTVE // MIND A 8 ELEM BESGYŰJTVE!</div>
+        <div style="color:#cbe4ea;font-size:14px;">A végső kulcsszó:</div>
+        <div class="keyword-value">PYTHON</div>
+        <br>
+        <a href="07_szovegszerkesztes.html" class="next-btn">TOVÁBB A 07. FELADATRA (SZÖVEGSZERKESZTÉS) ▶</a>
+      </div>
+    </div>
+
+    <!-- OLDALSÓ INFÓ ÉS CÉLOK -->
+    <div class="panel">
+      <h2>GYŰJTENDŐ IT-S ELEMEK</h2>
+      <div class="instructions-box">
+        <p>Irányítsd a kígyót a rácson, és szedd fel a következő cyberpunk / IT elemeket:</p>
+      </div>
+      <div class="side-list" id="itemList">
+        <div class="item-tag" id="item-0"><span>💾 CPU / Processzor</span><span>[ ]</span></div>
+        <div class="item-tag" id="item-1"><span>🧠 RAM / Memória</span><span>[ ]</span></div>
+        <div class="item-tag" id="item-2"><span>🛡️ Tűzfal (Firewall)</span><span>[ ]</span></div>
+        <div class="item-tag" id="item-3"><span>🤖 Mesterséges Intelligencia</span><span>[ ]</span></div>
+        <div class="item-tag" id="item-4"><span>🌐 Router / Hálózat</span><span>[ ]</span></div>
+        <div class="item-tag" id="item-5"><span>⚡ Optikai Kábel</span><span>[ ]</span></div>
+        <div class="item-tag" id="item-6"><span>🐛 Debug / Bugfix</span><span>[ ]</span></div>
+        <div class="item-tag" id="item-7"><span>👑 Kernel / Mag</span><span>[ ]</span></div>
+      </div>
+      <div class="instructions-box" style="margin-top:14px;border-top:1px solid #1a3b46;padding-top:12px">
+        <strong>Irányítás:</strong>
+        <ul>
+          <li>Nyilak (↑ ↓ ← →) a billentyűzeten</li>
+          <li>Kerüld el a falakat és a saját farkad!</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const canvas = document.getElementById('snakeCanvas');
+const ctx = canvas.getContext('2d');
+const gridSize = 20;
+const tileCount = 25; // 20x20 grid = 400x400 px
+
+const itemsData = [
+  { name: "CPU", icon: "💾", color: "#00ffd5" },
+  { name: "RAM", icon: "🧠", color: "#ff2bd6" },
+  { name: "Firewall", icon: "🛡️", color: "#ffd166" },
+  { name: "AI", icon: "🤖", color: "#6dff9b" },
+  { name: "Router", icon: "🌐", color: "#4cc9ff" },
+  { name: "Fiber", icon: "⚡", color: "#ff70a6" },
+  { name: "Bugfix", icon: "🐛", color: "#b5838d" },
+  { name: "Kernel", icon: "👑", color: "#e5989b" }
+];
+
+let snake = [];
+let direction = 'RIGHT';
+let nextDirection = 'RIGHT';
+let food = { x: 5, y: 5, index: 0 };
+let collectedCount = 0;
+let gameInterval = null;
+let isPlaying = false;
+let isGameOver = false;
+
+function initGame() {
+  snake = [
+    { x: 10, y: 10 },
+    { x: 9, y: 10 },
+    { x: 8, y: 10 }
+  ];
+  direction = 'RIGHT';
+  nextDirection = 'RIGHT';
+  collectedCount = 0;
+  isGameOver = false;
+  document.getElementById('keywordBox').classList.remove('show');
+  updateScoreUI();
+  spawnFood();
+}
+
+function spawnFood() {
+  if (collectedCount >= itemsData.length) return;
+  let valid = false;
+  while (!valid) {
+    food.x = Math.floor(Math.random() * tileCount);
+    food.y = Math.floor(Math.random() * tileCount);
+    valid = !snake.some(segment => segment.x === food.x && segment.y === food.y);
+  }
+  food.index = collectedCount;
+}
+
+function updateScoreUI() {
+  document.getElementById('scoreVal').textContent = `${collectedCount} / ${itemsData.length}`;
+  for (let i = 0; i < itemsData.length; i++) {
+    const el = document.getElementById(`item-${i}`);
+    if (i < collectedCount) {
+      el.classList.add('collected');
+      el.querySelector('span:last-child').textContent = '[ ✓ ]';
+    } else {
+      el.classList.remove('collected');
+      el.querySelector('span:last-child').textContent = '[ ]';
+    }
+  }
+}
+
+function gameStep() {
+  direction = nextDirection;
+  const head = { ...snake[0] };
+
+  if (direction === 'UP') head.y--;
+  if (direction === 'DOWN') head.y++;
+  if (direction === 'LEFT') head.x--;
+  if (direction === 'RIGHT') head.x++;
+
+  // Wall collision check
+  if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+    gameOver("A kígyó nekiütközött a falnak!");
+    return;
+  }
+
+  // Self collision check
+  if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+    gameOver("A kígyó beleharapott a saját farkába!");
+    return;
+  }
+
+  snake.unshift(head);
+
+  // Check food collision
+  if (head.x === food.x && head.y === food.y) {
+    collectedCount++;
+    updateScoreUI();
+    if (collectedCount >= itemsData.length) {
+      winGame();
+      return;
+    }
+    spawnFood();
+  } else {
+    snake.pop();
+  }
+
+  draw();
+}
+
+function draw() {
+  // Clear background
+  ctx.fillStyle = '#03070c';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw grid lines (subtle cyberpunk)
+  ctx.strokeStyle = 'rgba(0, 255, 213, 0.04)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < tileCount; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * gridSize, 0);
+    ctx.lineTo(i * gridSize, canvas.height);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i * gridSize);
+    ctx.lineTo(canvas.width, i * gridSize);
+    ctx.stroke();
+  }
+
+  // Draw food item
+  if (collectedCount < itemsData.length) {
+    const item = itemsData[food.index];
+    ctx.font = '18px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.icon, food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2);
+  }
+
+  // Draw snake
+  snake.forEach((segment, idx) => {
+    ctx.fillStyle = idx === 0 ? '#00ffd5' : '#ff2bd6';
+    ctx.shadowColor = idx === 0 ? '#00ffd5' : '#ff2bd6';
+    ctx.shadowBlur = 10;
+    ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
+    ctx.shadowBlur = 0;
+  });
+}
+
+function startGame() {
+  if (isPlaying) return;
+  initGame();
+  isPlaying = true;
+  if (gameInterval) clearInterval(gameInterval);
+  gameInterval = setInterval(gameStep, 170);
+}
+
+function pauseGame() {
+  if (!isPlaying) return;
+  clearInterval(gameInterval);
+  isPlaying = false;
+}
+
+function gameOver(msg) {
+  clearInterval(gameInterval);
+  isPlaying = false;
+  ctx.fillStyle = 'rgba(5, 9, 15, 0.85)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#ff4c75';
+  ctx.font = 'bold 20px Consolas, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText("JÁTÉK VÉGE!", canvas.width / 2, canvas.height / 2 - 15);
+  ctx.fillStyle = '#cbe4ea';
+  ctx.font = '13px Consolas, monospace';
+  ctx.fillText("Kattints a 'Játék indítása' gombra az újrakezdéshez.", canvas.width / 2, canvas.height / 2 + 15);
+}
+
+function winGame() {
+  clearInterval(gameInterval);
+  isPlaying = false;
+  draw();
+  document.getElementById('keywordBox').classList.add('show');
+  document.getElementById('keywordBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+window.addEventListener('keydown', e => {
+  if (['ArrowUp', 'KeyW'].includes(e.code) && direction !== 'DOWN') nextDirection = 'UP';
+  if (['ArrowDown', 'KeyS'].includes(e.code) && direction !== 'UP') nextDirection = 'DOWN';
+  if (['ArrowLeft', 'KeyA'].includes(e.code) && direction !== 'RIGHT') nextDirection = 'LEFT';
+  if (['ArrowRight', 'KeyD'].includes(e.code) && direction !== 'LEFT') nextDirection = 'RIGHT';
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+    e.preventDefault();
+  }
+});
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('pauseBtn').addEventListener('click', pauseGame);
+
+// Initial draw
+initGame();
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEVEL UP // Képreállító</title>
+<style>
+:root{--bg:#070b14;--panel:#101827;--line:#244253;--cyan:#46f5e6;--pink:#ff3eb5;--text:#e7f7ff;--muted:#8ca6b9;--green:#6cff9a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#14243b 0,#070b14 58%);color:var(--text);font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif}main{max-width:1250px;margin:auto;padding:24px 18px 45px}.eyebrow{color:var(--cyan);letter-spacing:.18em;font-size:.78rem;font-weight:800}.header{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--line);padding-bottom:18px}.header h1{margin:4px 0;font-size:clamp(1.6rem,4vw,2.6rem);line-height:1.1}.status{border:1px solid var(--pink);color:#ff9cdb;padding:7px 11px;border-radius:4px;font-size:.75rem;letter-spacing:.1em;white-space:nowrap}.intro{color:#c0d3e2;max-width:850px;margin:18px 0 22px}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr);gap:14px;align-items:start}.panel{background:linear-gradient(150deg,#111c2b,#0a111d);border:1px solid var(--line);border-radius:12px;padding:17px;box-shadow:0 12px 35px #0004}.panel h2{font-size:1.05rem;letter-spacing:.06em;margin:0 0 12px}.instructions{display:grid;gap:8px}.instruction{display:grid;grid-template-columns:28px 1fr;gap:9px;align-items:center;background:#0a1320;border:1px solid #1d3546;padding:8px 10px;border-radius:6px}.num{display:grid;place-items:center;width:26px;height:26px;border:1px solid var(--cyan);color:var(--cyan);border-radius:5px;font-weight:800}.instruction strong{color:#fff}.instruction small{display:block;color:var(--muted);font-size:.8rem}.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.tile{min-width:0;background:#0a111b;border:1px solid #294153;border-radius:7px;padding:7px;text-align:center;cursor:grab;touch-action:manipulation}.tile:focus{outline:2px solid var(--cyan)}.tile.dragging{opacity:.4}.tile canvas{width:100%;aspect-ratio:1;display:block;border:1px solid #314858;background:#111}.tile-label{font-size:.76rem;color:var(--cyan);margin:5px 0 7px}.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.controls button,.btn{border:1px solid #35566a;background:#142638;color:var(--text);padding:6px 3px;border-radius:4px;cursor:pointer;font-size:.78rem}.controls button:hover,.btn:hover{border-color:var(--cyan);color:var(--cyan)}.controls button:focus-visible,.btn:focus-visible{outline:2px solid var(--cyan)}.subnote{font-size:.82rem;color:var(--muted);margin:10px 0 0}.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;max-width:650px;margin:0 auto}.slot{position:relative;aspect-ratio:1;border:1px dashed #4c7284;background:#09121e;display:grid;place-items:center;overflow:hidden}.slot:before{content:attr(data-place);position:absolute;top:5px;left:7px;color:#608194;font-size:.7rem;z-index:2;pointer-events:none}.slot.over{border:2px solid var(--cyan);background:#15303b}.slot canvas{width:100%;height:100%;display:block}.slot .empty{color:#486679;font-size:1.6rem}.board-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}.btn.primary{background:var(--cyan);color:#061216;border-color:var(--cyan);font-weight:900}.btn.reset{border-color:#7b345f}.feedback{min-height:45px;margin-top:14px;border:1px solid #274355;background:#09121d;border-radius:6px;padding:10px 12px;color:#a9c4d5}.feedback.good{border-color:var(--green);color:var(--green)}.feedback.bad{border-color:var(--pink);color:#ff9cdb}.success{display:none;margin-top:16px;padding:18px;text-align:center;border:1px solid var(--green);border-radius:9px;background:#0b201b}.success.show{display:block}.success h2{color:var(--green);font-size:1.3rem}.password{font-size:1.8rem;letter-spacing:.25em;color:var(--cyan);font-weight:900}.foot{color:#597488;text-align:center;font-size:.75rem;margin-top:20px}@media(max-width:1050px){.layout{grid-template-columns:repeat(2,minmax(0,1fr))}.layout>.panel:last-child{grid-column:1/-1}}@media(max-width:680px){.layout{grid-template-columns:1fr}.layout>.panel:last-child{grid-column:auto}.header{align-items:flex-start;flex-direction:column}.status{white-space:normal}.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:420px){main{padding:16px 10px}.panel{padding:12px}.controls button{font-size:.7rem}.tile{padding:4px}.tile-label{font-size:.7rem}}
+</style>
+</head>
+<body>
+<!-- LEVEL UP UNIFIED NAVIGATION -->
+<style>
+  .lu-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(4, 10, 17, 0.96);
+    border-bottom: 1px solid #00ffd555;
+    box-shadow: 0 4px 24px rgba(0, 255, 213, 0.12);
+    font-family: Consolas, 'Segoe UI', monospace;
+    backdrop-filter: blur(8px);
+  }
+  .lu-nav-brand {
+    color: #00ffd5;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lu-nav-brand span {
+    color: #ff2bd6;
+  }
+  .lu-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .lu-nav-link {
+    text-decoration: none;
+    color: #9bc2c9;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 7px 12px;
+    border: 1px solid #1d3f4b;
+    border-radius: 6px;
+    background: #08131d;
+    transition: all 0.2s ease;
+  }
+  .lu-nav-link:hover {
+    color: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 12px rgba(0, 255, 213, 0.25);
+  }
+  .lu-nav-link.active {
+    color: #041016;
+    background: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 16px rgba(0, 255, 213, 0.45);
+  }
+  .lu-nav-arrows {
+    display: flex;
+    gap: 6px;
+  }
+  .lu-nav-arrow {
+    text-decoration: none;
+    color: #ff7ce5;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 10px;
+    border: 1px solid #ff2bd666;
+    border-radius: 6px;
+    background: rgba(255, 43, 214, 0.08);
+    transition: all 0.2s ease;
+  }
+  .lu-nav-arrow:hover {
+    background: rgba(255, 43, 214, 0.22);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 43, 214, 0.35);
+  }
+  @media (max-width: 720px) {
+    .lu-navbar {
+      padding: 8px 12px;
+      justify-content: center;
+    }
+    .lu-nav-brand {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+<nav class="lu-navbar" aria-label="Feladatok közötti navigáció">
+  <div class="lu-nav-brand">RÁKÓCZI <span>//</span> LEVEL UP</div>
+  <div class="lu-nav-links">
+    <a href="01_binary_grid.html" class="lu-nav-link">01 // GRID</a>
+    <a href="02_level_up_mail.html" class="lu-nav-link">02 // MAIL</a>
+    <a href="03_robot_prompt.html" class="lu-nav-link">03 // PROMPT</a>
+    <a href="04_kepkirako.html" class="lu-nav-link active">04 // KIRAKÓ</a>
+    <a href="05_kepszerkesztes_teszt.html" class="lu-nav-link">05 // TESZT</a>
+    <a href="06_cyber_snake.html" class="lu-nav-link">06 // SNAKE</a>
+    <a href="07_szovegszerkesztes.html" class="lu-nav-link">07 // WORD</a>
+  </div>
+  <div class="lu-nav-arrows">
+    <a href="03_robot_prompt.html" class="lu-nav-arrow" title="Előző oldal">◀ ELŐZŐ</a>
+    <a href="05_kepszerkesztes_teszt.html" class="lu-nav-arrow" title="Következő oldal">KÖVETKEZŐ ▶</a>
+  </div>
+</nav>
+<main>
+<div class="header"><div><div class="eyebrow">RÁKÓCZI EKULTÚRA KUPA 2.0 // LEVEL UP</div><h1>KÉPREÁLLÍTÓ PROTOKOLL</h1></div><div class="status">SYSTEM RECOVERY // 09 TÖREDEK</div></div>
+<p class="intro">A titkosított képfájl kilenc darabra esett szét. Kövesd a műveleti listát, alakítsd át a megfelelő képdarabokat, majd húzd őket a megfelelő helyre. A képet csak akkor tudod helyreállítani, ha minden darab tájolása és helye megfelelő.</p>
+<div class="layout">
+<section class="panel"><h2>01 // MŰVELETI LISTA</h2><div class="instructions" id="instructions"></div><p class="subnote">Kövesd a darabokhoz tartozó utasításokat. A forgatás és tükrözés a képdarabok alatti gombokkal végezhető.</p></section>
+<section class="panel"><h2>02 // KÉPDARABOK</h2><div id="tiles" class="tiles"></div><p class="subnote">A darabokat húzd a jobb oldali kirakó megfelelő mezőibe. A gombokkal forgathatod vagy tükrözheted őket.</p></section>
+<section class="panel"><h2>03 // ÁLLÍTSD HELYRE A KÉPET</h2><div class="board" id="board"></div><div class="board-actions"><button class="btn primary" id="check">KÉP ELLENŐRZÉSE</button><button class="btn reset" id="reset">ÚJRAINDÍTÁS</button></div><div class="feedback" id="feedback" aria-live="polite">Várakozás a műveletekre… Húzd a darabokat a rács megfelelő mezőibe.</div><div class="success" id="success"><h2>✓ SIKERES KÉPREÁLLÍTÁS</h2><div class="password">CYBER</div><p style="margin-top:12px"><a href="05_kepszerkesztes_teszt.html" style="display:inline-block;padding:8px 16px;border-radius:6px;background:#46f5e6;color:#061216;font-weight:bold;text-decoration:none;letter-spacing:1px">TOVÁBB A 05. MODULRA (KÉPSZERKESZTÉS) ▶</a></p></div></section>
+</div><div class="foot">LEVEL UP // IMAGE RECOVERY MODULE v2.0</div>
+</main>
+<script>
+const N=3, SIZE=300;
+const operations=[
+ {id:1,place:'bal felső',op:'Forgasd el 90°-kal jobbra!',kind:'rotate',value:90},
+ {id:2,place:'felső középső',op:'Tükrözd vízszintesen!',kind:'flipH'},
+ {id:3,place:'jobb felső',op:'Forgasd el 180°-kal!',kind:'rotate',value:180},
+ {id:4,place:'bal középső',op:'Tükrözd függőlegesen!',kind:'flipV'},
+ {id:5,place:'középső',op:'Hagyd változatlanul!',kind:'none'},
+ {id:6,place:'jobb középső',op:'Forgasd el 90°-kal balra!',kind:'rotate',value:-90},
+ {id:7,place:'bal alsó',op:'Tükrözd vízszintesen!',kind:'flipH'},
+ {id:8,place:'alsó középső',op:'Forgasd el 180°-kal!',kind:'rotate',value:180},
+ {id:9,place:'jobb alsó',op:'Forgasd el 90°-kal jobbra!',kind:'rotate',value:90}
+];
+const state={}; let dragId=null; let originalCanvas=null;
+function makeSource(){const c=document.createElement('canvas');c.width=c.height=900;const x=c.getContext('2d');
+ const g=x.createLinearGradient(0,0,900,900);g.addColorStop(0,'#07111f');g.addColorStop(.5,'#132744');g.addColorStop(1,'#080d19');x.fillStyle=g;x.fillRect(0,0,900,900);
+ // subtle circuit pattern
+ x.strokeStyle='rgba(70,245,230,.19)';x.lineWidth=3;for(let i=0;i<12;i++){let y=35+i*72;x.beginPath();x.moveTo(0,y);x.lineTo(90,y);x.lineTo(125,y+25);x.lineTo(230,y+25);x.stroke();x.beginPath();x.moveTo(900,y+30);x.lineTo(810,y+30);x.lineTo(780,y);x.lineTo(700,y);x.stroke();}
+ for(let i=0;i<45;i++){x.fillStyle=i%2?'rgba(255,62,181,.5)':'rgba(70,245,230,.55)';x.fillRect((i*137)%900,(i*211)%900,4+(i%3)*2,4+(i%3)*2)}
+ x.strokeStyle='#46f5e6';x.lineWidth=8;x.strokeRect(24,24,852,852);x.strokeStyle='rgba(255,62,181,.85)';x.lineWidth=3;x.strokeRect(40,40,820,820);
+ x.textAlign='center';x.fillStyle='#46f5e6';x.font='bold 45px system-ui';x.fillText('RÁKÓCZI // LEVEL UP',450,170);
+ x.fillStyle='#ffffff';x.font='900 98px system-ui';x.shadowColor='#46f5e6';x.shadowBlur=25;x.fillText('SYSTEM',450,390);x.fillText('RESTORED',450,500);x.shadowBlur=0;
+ x.fillStyle='#ff3eb5';x.font='bold 30px monospace';x.fillText('ACCESS GRANTED  //  2036',450,610);
+ x.fillStyle='#b4cde1';x.font='24px monospace';x.fillText('IMAGE RECOVERY PROTOCOL',450,680);
+ x.strokeStyle='#46f5e6';x.lineWidth=4;x.beginPath();x.arc(450,760,35,0,Math.PI*2);x.stroke();x.fillStyle='#46f5e6';x.font='bold 28px monospace';x.fillText('09',450,770);
+ return c;}
+function transformCanvas(id,small=false){const s=state[id];const size=small?150:300;const c=document.createElement('canvas');c.width=c.height=size;const ctx=c.getContext('2d');ctx.clearRect(0,0,size,size);ctx.save();ctx.translate(size/2,size/2);ctx.rotate(s.angle*Math.PI/180);ctx.scale(s.flipH?-1:1,s.flipV?-1:1);const sourceSize=SIZE;ctx.drawImage(originalCanvas,((id-1)%3)*SIZE,Math.floor((id-1)/3)*SIZE,SIZE,SIZE,-size/2,-size/2,size,size);ctx.restore();return c;}
+function renderTile(id){const tile=document.querySelector(`[data-tile="${id}"]`);if(!tile)return;const old=tile.querySelector('canvas');if(old)old.remove();const c=transformCanvas(id,true);tile.insertBefore(c,tile.querySelector('.tile-label'));}
+function renderSlot(index){const slot=document.querySelector(`[data-slot="${index}"]`);slot.innerHTML='';slot.dataset.place=['bal felső','felső közép','jobb felső','bal közép','közép','jobb közép','bal alsó','alsó közép','jobb alsó'][index];const id=state.slots[index];if(id){const c=transformCanvas(id);c.style.width='100%';c.style.height='100%';slot.appendChild(c);slot.dataset.occupied=id;}else{slot.innerHTML='<span class="empty">+</span>';slot.dataset.occupied='';}}
+function renderAll(){for(let i=0;i<9;i++)renderSlot(i);for(let id=1;id<=9;id++)renderTile(id);}
+function apply(id,kind,value){const s=state[id];if(kind==='rotate')s.angle=((s.angle+value)%360+360)%360;else if(kind==='flipH')s.flipH=!s.flipH;else if(kind==='flipV')s.flipV=!s.flipV;renderTile(id);for(let i=0;i<9;i++)if(state.slots[i]===id)renderSlot(i);document.getElementById('feedback').className='feedback';document.getElementById('feedback').textContent=`${id}. darab módosítva. Folytasd a műveleti lista szerint.`;document.getElementById('success').classList.remove('show');}
+function createUI(){const ins=document.getElementById('instructions'),tiles=document.getElementById('tiles'),board=document.getElementById('board');operations.forEach(o=>{const d=document.createElement('div');d.className='instruction';d.innerHTML=`<span class="num">${o.id}</span><div><strong>${o.id}. darab → ${o.place}</strong><small>${o.op}</small></div>`;ins.appendChild(d)});
+ // Initial transforms are the inverse of the instructions.
+ operations.forEach(o=>{let angle=0,flipH=false,flipV=false;if(o.kind==='rotate')angle=(-o.value+360)%360; if(o.kind==='flipH')flipH=true;if(o.kind==='flipV')flipV=true;state[o.id]={angle,flipH,flipV};const t=document.createElement('div');t.className='tile';t.draggable=true;t.tabIndex=0;t.dataset.tile=o.id;t.innerHTML=`<div class="tile-label">DARAB ${String(o.id).padStart(2,'0')}</div><div class="controls"><button type="button" data-act="left" title="Forgatás balra">↺</button><button type="button" data-act="right" title="Forgatás jobbra">↻</button><button type="button" data-act="h" title="Vízszintes tükrözés">⇄</button><button type="button" data-act="v" title="Függőleges tükrözés">⇅</button></div>`;t.addEventListener('dragstart',e=>{dragId=o.id;t.classList.add('dragging');e.dataTransfer.setData('text/plain',String(o.id));e.dataTransfer.effectAllowed='move'});t.addEventListener('dragend',()=>{t.classList.remove('dragging');dragId=null});t.addEventListener('click',e=>{const a=e.target.dataset.act;if(!a)return;e.stopPropagation();if(a==='left')apply(o.id,'rotate',-90);if(a==='right')apply(o.id,'rotate',90);if(a==='h')apply(o.id,'flipH');if(a==='v')apply(o.id,'flipV')});tiles.appendChild(t)});
+ for(let i=0;i<9;i++){state.slots??=[];state.slots[i]=null;const s=document.createElement('div');s.className='slot';s.dataset.slot=i;s.dataset.place='';s.addEventListener('dragover',e=>{e.preventDefault();s.classList.add('over')});s.addEventListener('dragleave',()=>s.classList.remove('over'));s.addEventListener('drop',e=>{e.preventDefault();s.classList.remove('over');const id=Number(e.dataTransfer.getData('text/plain'))||dragId;if(!id)return;const existing=state.slots[i];const from=state.slots.indexOf(id);if(from>=0)state.slots[from]=existing||null;state.slots[i]=id;renderAll()});s.addEventListener('click',()=>{if(dragId){state.slots[i]=dragId;renderAll()}});board.appendChild(s)}
+}
+function check(){const feedback=document.getElementById('feedback');let allPlaced=state.slots.every(Boolean);if(!allPlaced){feedback.className='feedback bad';feedback.textContent='Még nincs mind a kilenc képdarab a rácsban. Helyezd el mindegyiket!';return}
+ for(let i=0;i<9;i++){const id=state.slots[i];if(id!==i+1){feedback.className='feedback bad';feedback.textContent='A kép még nem állt helyre. Ellenőrizd a darabok helyét a műveleti lista alapján!';return}}
+ for(let id=1;id<=9;id++){const s=state[id];if(s.angle!==0||s.flipH||s.flipV){feedback.className='feedback bad';feedback.textContent=`A ${id}. darab tájolása még nem megfelelő. Nézd meg újra a hozzá tartozó utasítást!`;return}}
+ feedback.className='feedback good';feedback.innerHTML='✓ MINDEN ELLENŐRZÉS SIKERES! KULCSSZÓ: <span style="display:inline-block;margin:4px 0;padding:3px 10px;border:1px solid #00ffd5;border-radius:5px;background:#00ffd51a;color:#00ffd5;font-weight:900;font-size:15px;letter-spacing:3px">CYBER</span>';document.getElementById('success').classList.add('show');}
+function reset(){state.slots=Array(9).fill(null);operations.forEach(o=>{state[o.id]={angle:o.kind==='rotate'?((-o.value+360)%360):0,flipH:o.kind==='flipH',flipV:o.kind==='flipV'}});document.getElementById('success').classList.remove('show');const f=document.getElementById('feedback');f.className='feedback';f.textContent='Újraindítva. Húzd a darabokat a rács megfelelő mezőibe, majd végezd el a műveleteket.';renderAll()}
+originalCanvas=makeSource();createUI();
+// Shuffle starting tile order so the tray behaves like a real puzzle.
+const tray=document.getElementById('tiles');[...tray.children].sort(()=>Math.random()-.5).forEach(n=>tray.appendChild(n));renderAll();
+document.getElementById('check').addEventListener('click',check);document.getElementById('reset').addEventListener('click',reset);
+</script></body></html>

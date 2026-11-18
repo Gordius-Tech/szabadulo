@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEVEL UP Mail // Rákóczi</title>
+<style>
+:root{--bg:#05090f;--panel:#0a111b;--panel2:#0d1723;--line:#183641;--cyan:#00ffd5;--pink:#ff2bd6;--text:#e3f5f5;--muted:#8ba8b2;--red:#ff315a;--green:#6dff9b}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 20% 0%,#09202a 0,transparent 42%),radial-gradient(ellipse at 90% 90%,#210d2b 0,transparent 36%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#fff04 4px);opacity:.12;z-index:5}
+.app{min-height:calc(100vh - 54px);position:relative}
+.topbar{height:76px;display:flex;align-items:center;gap:22px;padding:0 26px;border-bottom:1px solid #17323c;background:#061019ef;box-shadow:0 5px 28px #00ffd50a}
+.brand{display:flex;align-items:center;gap:12px;min-width:220px}
+.brand-icon{width:40px;height:32px;border:1px solid var(--cyan);border-radius:7px;display:grid;place-items:center;color:var(--cyan);font-weight:900;font-size:20px;box-shadow:0 0 18px #00ffd522}
+.brand-name{font-size:19px;letter-spacing:1px;font-weight:800}
+.brand-name span{color:var(--cyan);text-shadow:0 0 12px #00ffd566}
+.search{flex:1;max-width:760px;display:flex;align-items:center;gap:12px;border:1px solid #21434d;background:#0a1721;border-radius:14px;padding:13px 18px;color:var(--muted);box-shadow:inset 0 0 20px #00ffd506}
+.search input{background:transparent;border:0;outline:0;color:var(--text);font-size:15px;width:100%}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:var(--muted)}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--cyan),var(--pink));color:#071018;font-weight:bold}
+
+/* MISSION BANNER */
+.mission-banner{max-width:1600px;margin:18px auto 0;padding:0 22px}
+.mission-card{border:1px solid #00ffd555;background:linear-gradient(135deg,#081822f0,#120c20f0);border-radius:14px;padding:18px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;box-shadow:0 0 30px #00ffd512}
+.mission-info{flex:1;min-width:280px}
+.mission-eyebrow{font:700 11px Consolas,monospace;letter-spacing:2.5px;color:var(--pink);margin-bottom:6px}
+.mission-title{font-size:18px;font-weight:800;color:var(--cyan);margin:0 0 6px}
+.mission-desc{margin:0;font-size:14px;line-height:1.55;color:#cbe4ea}
+.mission-desc strong{color:#fff}
+.mission-solver{display:flex;flex-direction:column;gap:8px;min-width:300px;max-width:440px;width:100%;background:#060f17;border:1px solid #1e424e;padding:14px 16px;border-radius:10px}
+.solver-label{font:700 11px Consolas,monospace;letter-spacing:1.5px;color:var(--cyan)}
+.solver-row{display:flex;gap:8px}
+.solver-row input{flex:1;min-width:0;background:#03080e;border:1px solid #2b5462;border-radius:7px;padding:10px 12px;color:var(--cyan);font:700 15px Consolas,monospace;letter-spacing:2px;text-transform:uppercase;outline:none}
+.solver-row input:focus{border-color:var(--cyan);box-shadow:0 0 14px #00ffd528}
+.solver-btn{background:var(--cyan);color:#041016;border:0;border-radius:7px;padding:10px 16px;font:800 12px Consolas,monospace;letter-spacing:1px;cursor:pointer;white-space:nowrap;transition:.2s}
+.solver-btn:hover{box-shadow:0 0 18px #00ffd566;transform:translateY(-1px)}
+.solver-feedback{font:12px Consolas,monospace;min-height:18px;color:var(--muted)}
+.solver-feedback.ok{color:var(--green)}
+.solver-feedback.bad{color:#ff5c84}
+.next-module-btn{display:inline-block;margin-top:8px;padding:8px 14px;border-radius:6px;background:var(--pink);color:#fff;font:800 12px Consolas,monospace;text-decoration:none;letter-spacing:1px;box-shadow:0 0 15px #ff2bd655}
+.next-module-btn:hover{background:#ff4de0}
+
+.layout{display:grid;grid-template-columns:235px minmax(0,1fr);gap:20px;padding:18px 22px 26px;max-width:1600px;margin:auto}
+.sidebar{padding-top:4px}
+.compose{display:flex;align-items:center;gap:12px;background:linear-gradient(110deg,#00ffd51b,#ff2bd60b);border:1px solid #00ffd566;color:var(--text);border-radius:12px;padding:15px 18px;font-weight:700;box-shadow:0 0 24px #00ffd50b;margin-bottom:22px;cursor:pointer}
+.nav{display:flex;align-items:center;gap:14px;padding:12px 15px;border-radius:9px;color:#a8c3ca;margin:3px 0;font-size:14px;cursor:pointer;transition:.18s}
+.nav:hover{background:#00ffd510;color:var(--cyan)}
+.nav.active{background:#00ffd514;border:1px solid #00ffd533;color:var(--cyan);font-weight:bold}
+.nav .count{margin-left:auto;color:var(--pink);font-size:12px}
+.section-label{font-size:11px;color:#66838e;letter-spacing:2px;margin:26px 14px 9px}
+.main{min-width:0;border:1px solid #1a3b46;background:linear-gradient(140deg,#0b141ef5,#080e17f5);border-radius:17px;overflow:hidden;box-shadow:0 0 45px #00ffd509,inset 0 0 40px #ff2bd605}
+.toolbar{height:58px;border-bottom:1px solid #17313b;display:flex;align-items:center;gap:18px;padding:0 22px;color:var(--muted)}
+.tool{font-size:18px;cursor:pointer;transition:.2s}
+.tool:hover{color:var(--cyan);text-shadow:0 0 10px #00ffd566}
+.toolbar .spacer{flex:1}
+.mail-count{font-size:12px}
+.inbox-heading{padding:22px 28px 14px;display:flex;align-items:center;justify-content:space-between}
+.inbox-heading h1{font-size:22px;margin:0}
+.inbox-heading small{color:var(--muted);letter-spacing:1px}
+.mail-list{padding:0 14px 22px}
+.mail-row{display:grid;grid-template-columns:28px 42px minmax(140px,230px) minmax(0,1fr) 92px;gap:12px;align-items:center;padding:14px 14px;border-top:1px solid #16303a;background:#0a141d;cursor:pointer;transition:.2s;min-height:74px}
+.mail-row:hover{background:#10212a;box-shadow:inset 3px 0 var(--cyan)}
+.mail-row.unread{background:linear-gradient(90deg,#00ffd509,#0a141d 38%)}
+.mail-row.spam-item:hover{box-shadow:inset 3px 0 var(--pink)}
+.check{width:15px;height:15px;border:1px solid #58737b;border-radius:3px}
+.star{color:#718d95;font-size:19px}
+.sender{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sender small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:4px}
+.preview{min-width:0;font-size:13px;color:#b4cbd0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preview strong{color:#e7f7f8}
+.time{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap}
+.tag-pill{display:inline-block;margin-left:6px;font-size:9px;letter-spacing:1px;color:var(--cyan);border:1px solid #00ffd544;padding:2px 5px;border-radius:4px}
+.message{display:none;padding:27px clamp(18px,4vw,48px) 40px}
+.message.visible{display:block}
+.subject-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.subject{font-size:clamp(21px,3vw,29px);font-weight:500;letter-spacing:.2px;margin:0}
+.tag{font-size:10px;letter-spacing:1.5px;padding:6px 8px;border:1px solid #00ffd555;color:var(--cyan);border-radius:5px;background:#00ffd50a}
+.sender-row{display:flex;align-items:flex-start;gap:14px;margin-top:24px}
+.sender-avatar{flex:0 0 44px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#102d38;border:1px solid #00ffd566;color:var(--cyan);font-weight:900;box-shadow:0 0 20px #00ffd510}
+.sender-info{flex:1;min-width:0}
+.sender-name{font-weight:700;font-size:14px}
+.sender-email{color:var(--muted);font-size:12px;margin-top:4px}
+.date{font-size:12px;color:var(--muted);white-space:nowrap}
+.mail-body{max-width:790px;margin:24px 0 0 58px;line-height:1.7;font-size:15px;color:#d6e8ec}
+.ad-card{position:relative;margin:0 0 22px;padding:24px 26px;border:1px solid #00ffd555;background:linear-gradient(130deg,#071c24,#101021 70%,#190d22);border-radius:12px;overflow:hidden;box-shadow:0 0 30px #00ffd50c}
+.ad-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--cyan),var(--pink));box-shadow:0 0 15px var(--cyan)}
+.ad-eyebrow{font-size:10px;letter-spacing:3px;color:var(--cyan);margin-bottom:8px}
+.ad-title{font-size:clamp(22px,3.2vw,34px);font-weight:900;line-height:1.1;margin:0 0 10px;text-shadow:0 0 20px #00ffd51a}
+.ad-title span{color:var(--pink)}
+.ad-sub{color:#9fc2ca;margin:0;max-width:560px}
+.ad-lines{margin:0;padding:0;list-style:none}
+.ad-lines li{padding:8px 0;border-bottom:1px solid #18323a}
+.ad-lines li:last-child{border-bottom:0}
+.ad-lines li:before{content:"▸";color:var(--cyan);margin-right:10px}
+.cta{display:inline-flex;align-items:center;gap:10px;margin-top:20px;padding:12px 17px;border:1px solid var(--pink);border-radius:6px;color:#ff8ee9;font-weight:800;letter-spacing:1px;font-size:12px;background:#ff2bd60c;cursor:pointer}
+.signature{margin-top:22px;color:#a7c2c9}
+.signature strong{color:var(--cyan)}
+.reply-actions{display:flex;gap:12px;margin:26px 0 0 58px}
+.reply{border:1px solid #2a4c57;border-radius:22px;padding:10px 18px;color:#c3d8dd;background:#0b1720;font-size:13px;cursor:pointer}
+.reply:hover{border-color:var(--cyan);color:var(--cyan)}
+.status{position:fixed;right:20px;bottom:18px;border:1px solid #00ffd544;background:#06121aef;padding:9px 13px;border-radius:7px;font:11px Consolas,monospace;letter-spacing:1px;color:var(--cyan);z-index:8}
+.status:before{content:"●";color:var(--pink);margin-right:8px}
+.error-overlay{position:fixed;inset:0;z-index:20;background:#02040bdc;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
+.error-overlay.show{display:flex}
+.error-box{width:min(520px,100%);border:1px solid var(--red);background:linear-gradient(145deg,#170811,#090b14 65%);padding:30px;border-radius:14px;box-shadow:0 0 30px #ff315a35, inset 0 0 25px #ff315a0c;text-align:center;animation:glitch .25s ease-out}
+.error-icon{font-size:38px;color:var(--red);text-shadow:0 0 18px #ff315a88}
+.error-box h2{font:900 clamp(25px,5vw,36px) Consolas,monospace;letter-spacing:2px;color:#ff4f72;margin:12px 0}
+.error-box p{color:#c6aeb8;line-height:1.6}
+.error-code{font:12px Consolas,monospace;color:#ff7890;border:1px solid #6b263a;background:#200c16;padding:10px;margin:18px 0;letter-spacing:1px}
+.error-close{background:#ff315a12;border:1px solid var(--red);color:#ff8098;border-radius:6px;padding:11px 22px;font-weight:800;cursor:pointer;letter-spacing:1px}
+.error-close:hover{background:#ff315a25}
+@keyframes glitch{0%{transform:translateX(-5px);opacity:.6}30%{transform:translateX(5px)}60%{transform:translateX(-2px)}100%{transform:translateX(0);opacity:1}}
+.hidden{display:none!important}
+@media(max-width:760px){
+  .topbar{padding:0 13px;gap:12px}.brand{min-width:0}.brand-name{font-size:15px}.search{padding:11px}.top-right .help{display:none}
+  .mission-banner{padding:0 12px}.mission-card{padding:14px 16px}.mission-solver{min-width:0}
+  .layout{grid-template-columns:1fr;padding:12px}.sidebar{display:flex;gap:6px;overflow:auto;padding:0 0 8px}.compose{display:none}
+  .nav{white-space:nowrap;padding:10px}.section-label{display:none}.nav:not(.active){display:none}
+  .mail-body,.reply-actions{margin-left:0}.sender-row{flex-wrap:wrap}.date{margin-left:58px}.message{padding-top:20px}.ad-card{padding:20px 18px}
+  .toolbar{padding:0 15px}.mail-row{grid-template-columns:18px 20px minmax(0,1fr) 62px;gap:8px;padding:14px 8px}
+  .mail-row .sender{grid-column:3;grid-row:1}.mail-row .preview{grid-column:3;grid-row:2}.mail-row .time{grid-column:4;grid-row:1}
+  .inbox-heading{padding:20px 17px}.mail-count{display:none}
+}
+</style>
+</head>
+<body>
+<!-- LEVEL UP UNIFIED NAVIGATION -->
+<style>
+  .lu-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(4, 10, 17, 0.96);
+    border-bottom: 1px solid #00ffd555;
+    box-shadow: 0 4px 24px rgba(0, 255, 213, 0.12);
+    font-family: Consolas, 'Segoe UI', monospace;
+    backdrop-filter: blur(8px);
+  }
+  .lu-nav-brand {
+    color: #00ffd5;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lu-nav-brand span {
+    color: #ff2bd6;
+  }
+  .lu-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .lu-nav-link {
+    text-decoration: none;
+    color: #9bc2c9;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 7px 12px;
+    border: 1px solid #1d3f4b;
+    border-radius: 6px;
+    background: #08131d;
+    transition: all 0.2s ease;
+  }
+  .lu-nav-link:hover {
+    color: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 12px rgba(0, 255, 213, 0.25);
+  }
+  .lu-nav-link.active {
+    color: #041016;
+    background: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 16px rgba(0, 255, 213, 0.45);
+  }
+  .lu-nav-arrows {
+    display: flex;
+    gap: 6px;
+  }
+  .lu-nav-arrow {
+    text-decoration: none;
+    color: #ff7ce5;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 10px;
+    border: 1px solid #ff2bd666;
+    border-radius: 6px;
+    background: rgba(255, 43, 214, 0.08);
+    transition: all 0.2s ease;
+  }
+  .lu-nav-arrow:hover {
+    background: rgba(255, 43, 214, 0.22);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 43, 214, 0.35);
+  }
+  @media (max-width: 720px) {
+    .lu-navbar {
+      padding: 8px 12px;
+      justify-content: center;
+    }
+    .lu-nav-brand {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+<nav class="lu-navbar" aria-label="Feladatok közötti navigáció">
+  <div class="lu-nav-brand">RÁKÓCZI <span>//</span> LEVEL UP</div>
+  <div class="lu-nav-links">
+    <a href="01_binary_grid.html" class="lu-nav-link">01 // GRID</a>
+    <a href="02_level_up_mail.html" class="lu-nav-link active">02 // MAIL</a>
+    <a href="03_robot_prompt.html" class="lu-nav-link">03 // PROMPT</a>
+    <a href="04_kepkirako.html" class="lu-nav-link">04 // KIRAKÓ</a>
+    <a href="05_kepszerkesztes_teszt.html" class="lu-nav-link">05 // TESZT</a>
+    <a href="06_cyber_snake.html" class="lu-nav-link">06 // SNAKE</a>
+    <a href="07_szovegszerkesztes.html" class="lu-nav-link">07 // WORD</a>
+  </div>
+  <div class="lu-nav-arrows">
+    <a href="01_binary_grid.html" class="lu-nav-arrow" title="Előző oldal">◀ ELŐZŐ</a>
+    <a href="03_robot_prompt.html" class="lu-nav-arrow" title="Következő oldal">KÖVETKEZŐ ▶</a>
+  </div>
+</nav>
+
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="brand-icon">✉</div><div class="brand-name">LEVEL UP <span>MAIL</span></div></div>
+  <div class="search" data-error="A keresőmodul nem válaszol."><span>⌕</span><input aria-label="Keresés a levelek között" placeholder="Keresés a levelek között" readonly></div>
+  <div class="top-right"><span class="help" data-error="A súgómodul nem elérhető.">? Súgó</span><span data-error="A beállítások adatbázisa sérült." style="cursor:pointer">⚙</span><div class="avatar" data-error="A felhasználói profil nem tölthető be.">R</div></div>
+</header>
+
+<!-- FELADAT LEÍRÁS ÉS TITKOS JELSZÓ MEZŐ -->
+<section class="mission-banner" aria-label="Feladat leírása és jelszó ellenőrzése">
+  <div class="mission-card">
+    <div class="mission-info">
+      <div class="mission-eyebrow">SECURITY PROTOCOL 02 // SPAM DETEKTÁLÁS</div>
+      <h2 class="mission-title">Feladat: Keresd meg a SPAM levelet a beérkező üzenetek között!</h2>
+      <p class="mission-desc">A postafiókban sok levél érkezett, de ezek között megbújik <strong>egy gyanús SPAM (kéretlen reklám/adathalász) üzenet</strong> is. Nyisd meg a leveleket, azonosítsd a spam üzenetet, majd írd be az <strong>ellenőrző szót</strong>, amely a <strong>spam e-mail szövegének az utolsó előtti szava</strong>! Helyes válasz esetén megkapod a szint kulcsszavát.</p>
+    </div>
+    <div class="mission-solver">
+      <label class="solver-label" for="secretPassword">ELLENŐRZŐ SZÓ (A SPAM SZÖVEG UTOLSÓ ELŐTTI SZAVA)</label>
+      <div class="solver-row">
+        <input id="secretPassword" type="text" placeholder="ÍRD BE A SZÓT..." autocomplete="off" aria-label="Ellenőrző szó megadása">
+        <button class="solver-btn" id="checkPasswordBtn" type="button">ELLENŐRZÉS</button>
+      </div>
+      <div class="solver-feedback" id="solverFeedback" aria-live="polite">Várakozás az ellenőrző szóra…</div>
+    </div>
+  </div>
+</section>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="compose" data-error="Új levél írása nem engedélyezett ebben a rendszerben.">＋ Új levél</div>
+  <div class="nav active" id="inboxNav" role="button" tabindex="0" aria-label="Vissza a beérkező levelekhez"><span>▣</span> Beérkező levelek <span class="count">8</span></div>
+  <div class="nav" data-error="A csillagozott levelek adatbázisa nem érhető el."><span>☆</span> Csillagozott</div>
+  <div class="nav" data-error="Az elhalasztott levelek modulja nem válaszol."><span>◷</span> Elhalasztott</div>
+  <div class="nav" data-error="Az elküldött levelek modulja nem válaszol."><span>➤</span> Elküldött</div>
+  <div class="nav" data-error="A piszkozatok adatbázisa sérült."><span>▤</span> Piszkozatok</div>
+  <div class="section-label">CÍMKÉK</div>
+  <div class="nav" data-error="A szűrési modul le van tiltva."><span style="color:var(--pink)">◆</span> Rendszer</div>
+  <div class="nav" data-error="A LEVEL UP címke jogosultsági hibát jelzett."><span style="color:var(--cyan)">◆</span> LEVEL UP</div>
+</aside>
+
+<main class="main">
+<div class="toolbar">
+  <span class="tool" title="Vissza a beérkező levelekhez" id="toolbarBack" role="button" tabindex="0">←</span>
+  <span class="tool" title="Archiválás" data-error="CRITICAL ERROR: az archiváló szolgáltatás leállt.">▣</span>
+  <span class="tool" title="Spam bejelentése" data-error="A spamvédelmi modul váratlan hibával leállt.">⚠</span>
+  <span class="tool" title="Törlés" data-error="Törlés sikertelen: a szerver nem válaszol.">▤</span>
+  <span style="height:22px;border-left:1px solid #23404a"></span>
+  <span class="tool" title="Olvasatlanná jelölés" data-error="Az állapotmódosító modul nem elérhető.">✉</span>
+  <span class="tool" title="Továbbiak" data-error="A műveleti menü sérült.">⋮</span>
+  <span class="spacer"></span>
+  <span class="mail-count" id="mailCounter">1–8 / 8</span>
+  <span class="tool" data-error="Nincs több levél a listában.">‹</span>
+  <span class="tool" data-error="Nincs több levél a listában.">›</span>
+</div>
+
+<!-- BEÉRKEZŐ LEVELEK LISTÁJA (8 LEVÉL, KÖZTÜK 1 SPAM) -->
+<section id="inbox">
+  <div class="inbox-heading"><h1>Beérkező levelek</h1><small>SECURE MAIL GATEWAY // 8 ÜZENET</small></div>
+  <div class="mail-list" id="mailList"></div>
+</section>
+
+<!-- MEGNYITOTT LEVÉL NÉZET -->
+<article class="message" id="messageView">
+  <div class="subject-row">
+    <h1 class="subject" id="msgSubject"></h1>
+    <span class="tag" id="msgTag">BEÉRKEZETT</span>
+  </div>
+  <div class="sender-row">
+    <div class="sender-avatar" id="msgAvatar">LU</div>
+    <div class="sender-info">
+      <div class="sender-name" id="msgSenderName"></div>
+      <div class="sender-email">címzett: én <span data-error="A levél részletei nem tölthetők be." style="cursor:pointer">⌄</span></div>
+    </div>
+    <div class="date" id="msgDate"></div>
+  </div>
+  <div class="mail-body" id="msgBody"></div>
+  <div class="reply-actions">
+    <button class="reply" id="backToInboxBtn" type="button">←　Vissza a beérkező levelekhez</button>
+    <button class="reply" type="button" data-error="Ez egy bemutató felület: válasz nem küldhető.">↩　Válasz</button>
+    <button class="reply" type="button" data-error="Ez egy bemutató felület: továbbítás nem érhető el.">➦　Továbbítás</button>
+  </div>
+</article>
+</main>
+</div>
+<div class="status">MAIL SYSTEM ONLINE // 8 MESSAGES</div>
+</div>
+
+<div class="error-overlay" id="errorOverlay" role="dialog" aria-modal="true" aria-labelledby="errorTitle">
+  <div class="error-box">
+    <div class="error-icon">⚠</div>
+    <h2 id="errorTitle">CRITICAL ERROR</h2>
+    <p id="errorText">A művelet végrehajtása sikertelen.</p>
+    <div class="error-code">SYSTEM FAILURE // CODE 0x00F1 // ACCESS DENIED</div>
+    <button class="error-close" id="closeError" type="button">VISSZA A RENDSZERHEZ</button>
+  </div>
+</div>
+
+<script>
+const mails = [
+  {
+    id: 1,
+    unread: true,
+    isSpam: false,
+    avatar: 'LU',
+    sender: 'LEVEL UP Informatikai Központ',
+    email: 'hello@levelup-digital.example',
+    subject: 'LEVEL UP – A jövő technológiája most kezdődik!',
+    preview: 'Fedezd fel a digitális világ izgalmas lehetőségeit és a verseny részleteit…',
+    time: '10:15',
+    tag: 'LEVEL UP',
+    body: `
+      <div class="ad-card">
+        <div class="ad-eyebrow">HIVATALOS TÁJÉKOZTATÓ // DIGITAL FUTURE</div>
+        <h2 class="ad-title">LEVEL <span>UP</span></h2>
+        <p class="ad-sub">Lépj szintet a digitális világban – fedezd fel, mire vagy képes!</p>
+      </div>
+      <ul class="ad-lines">
+        <li>Fedezd fel az informatika izgalmas világát!</li>
+        <li>Tanulj meg weboldalakat készíteni és programozni!</li>
+        <li>Próbáld ki a mesterséges intelligencia lehetőségeit!</li>
+        <li>Ismerd meg a számítógépek és a hálózatok titkait!</li>
+      </ul>
+      <p class="signature">Várunk a digitális jövőben!<br><strong>LEVEL UP csapata</strong></p>
+    `
+  },
+  {
+    id: 2,
+    unread: false,
+    isSpam: false,
+    avatar: 'IK',
+    sender: 'Iskolai Könyvtár',
+    email: 'konyvtar@rakoczi-kisvarda.example',
+    subject: 'Új informatikai szakkönyvek érkeztek az olvasóterembe',
+    preview: 'Friss Python, hálózatbiztonsági és webfejlesztési kiadványok kölcsönözhetők…',
+    time: '09:58',
+    tag: 'KÖNYVTÁR',
+    body: `
+      <p>Kedves Tanulók!</p>
+      <p>Tájékoztatunk benneteket, hogy az iskolai könyvtár állománya új programozási és kiberbiztonsági szakkönyvekkel bővült. A kötetek a nagyszünetekben és tanítás után szabadon megtekinthetők és kikölcsönözhetők.</p>
+      <p class="signature">Üdvözlettel:<br><strong>Könyvtári Információs Pult</strong></p>
+    `
+  },
+  {
+    id: 3,
+    unread: true,
+    isSpam: false,
+    avatar: 'RG',
+    sender: 'Rendszergazda Csoport',
+    email: 'admin@rakoczi-net.example',
+    subject: 'Tervezett hálózati karbantartás péntek délután',
+    preview: '16:00 és 17:30 között rövid ideig szünetel a belső fájlszerver elérése…',
+    time: '09:49',
+    tag: 'RENDSZER',
+    body: `
+      <p>Tisztelt Felhasználók!</p>
+      <p>Pénteken 16:00 órától biztonsági frissítéseket telepítünk az oktatótermek hálózati eszközein. A karbantartás ideje alatt a belső meghajtók átmenetileg nem lesznek elérhetők.</p>
+      <p class="signature">Köszönettel:<br><strong>Rendszergazda Csoport</strong></p>
+    `
+  },
+  {
+    id: 4,
+    unread: true,
+    isSpam: true,
+    avatar: 'MT',
+    sender: 'MEGA TECH PROMO',
+    email: 'nyerj@mega-tech-bonus.example',
+    subject: 'INGYEN SZUPERSZÁMÍTÓGÉP MINDENKINEK!!!',
+    preview: 'Korlátlan internet, végtelen tárhely, 1000× gyorsabb Wi-Fi – kattints most…',
+    time: '09:38',
+    tag: 'BEÉRKEZETT',
+    body: `
+      <div class="ad-card" style="border-color:#ff2bd677;background:linear-gradient(130deg,#240b24,#171024 70%,#260d1b)">
+        <div class="ad-eyebrow" style="color:var(--pink)">EXKLUZÍV TITKOS AJÁNLAT // CSAK MOST!!!</div>
+        <h2 class="ad-title">MEGA TECH <span style="color:var(--cyan)">ULTRA MAX</span></h2>
+        <p class="ad-sub">Forradalmi technológia, amitől a számítógéped gyorsabb lesz, mint a fény! És most teljesen ingyen a tiéd lehet!</p>
+      </div>
+      <ul class="ad-lines">
+        <li>🎁 NYERJ egy 1 000 000 magos szuperszámítógépet – csak kattints ide!</li>
+        <li>🚀 1000× gyorsabb Wi-Fi, még a Hold túlsó oldalán is tökéletes jellel!</li>
+        <li>♾️ Korlátlan tárhely: minden fájlod elfér, még az is, amit űrhajósok töltenek fel a Marsról!</li>
+        <li>🔋 Örök akkumulátor: soha többé nem kell töltened a laptopodat!</li>
+        <li>🤖 A mesterséges intelligencia megírja a házidat, megfőzi az ebédedet, és helyetted tanul!</li>
+        <li>💸 Ma 0 Ft, holnap is 0 Ft – nincs apró betű, nincs feltétel, csak add meg a jelszavad a nyeremény aktiválásához!</li>
+      </ul>
+      <div class="cta" data-error="A hirdetés külső oldala veszélyesnek tűnik. Ne adj meg személyes adatokat vagy jelszót!">AZONNALI NYEREMÉNY AKTIVÁLÁSA <span>↗</span></div>
+      <p class="signature">Siess! Az ajánlat mindössze <strong style="color:var(--pink)">7 másodpercig</strong> érvényes!<br><strong style="color:var(--pink)">MEGA TECH PROMO – Túl szép, hogy igaz legyen!</strong></p>
+    `
+  },
+  {
+    id: 5,
+    unread: false,
+    isSpam: false,
+    avatar: 'DÖ',
+    sender: 'Diákönkormányzat',
+    email: 'dok@rakoczi-kisvarda.example',
+    subject: 'Emlékeztető: e-Sport és logikai délután regisztráció',
+    preview: 'A csapatok nevezését szerda 14:00 óráig várjuk a portán vagy e-mailben…',
+    time: '09:12',
+    tag: 'DIÁKÉLET',
+    body: `
+      <p>Sziasztok!</p>
+      <p>Ne felejtsétek el leadni a csapatnevezéseket a jövő heti iskolai digitális kihívásra. Háromfős csapatok jelentkezését várjuk minden évfolyamról.</p>
+      <p class="signature">Üdv:<br><strong>Diákönkormányzat</strong></p>
+    `
+  },
+  {
+    id: 6,
+    unread: false,
+    isSpam: false,
+    avatar: 'KT',
+    sender: 'Kréta Értesítő',
+    email: 'ertesites@e-kreta.example',
+    subject: 'Órarendi változás – Digitális kultúra gyakorlat',
+    preview: 'A csütörtöki 5. óra a 204-es informatikai laborban kerül megtartásra…',
+    time: 'Tegnap',
+    tag: 'TANULMÁNYI',
+    body: `
+      <p>Tisztelt Tanuló!</p>
+      <p>Értesítjük, hogy a csütörtöki Digitális kultúra gyakorlat teremcserével (204-es labor) kerül megtartásra.</p>
+      <p class="signature">Üdvözlettel:<br><strong>Tanulmányi Rendszer</strong></p>
+    `
+  },
+  {
+    id: 7,
+    unread: false,
+    isSpam: false,
+    avatar: 'MÉ',
+    sender: 'Menzainfo',
+    email: 'etkezes@kisvarda-menza.example',
+    subject: 'Jövő heti ebédmenü és befizetési határidő',
+    preview: 'Megjelent a következő heti étlap, az igénylések péntekig módosíthatók…',
+    time: 'Tegnap',
+    tag: 'MENZA',
+    body: `
+      <p>Tisztelt Igénylők!</p>
+      <p>A következő hétre vonatkozó menüválasztás és befizetés péntek délig rögzíthető az online felületen.</p>
+      <p class="signature">Üdvözlettel:<br><strong>Étkeztetési Iroda</strong></p>
+    `
+  },
+  {
+    id: 8,
+    unread: false,
+    isSpam: false,
+    avatar: 'SZ',
+    sender: 'Szakköri Hírlevél',
+    email: 'robotika@rakoczi-lab.example',
+    subject: 'Robotika és mikrovezérlő szakkör – e heti anyagok',
+    preview: 'Feltöltöttük a szenzorok bekötési rajzát és a minta programkódokat…',
+    time: 'Nov 15.',
+    tag: 'SZAKKÖR',
+    body: `
+      <p>Sziasztok!</p>
+      <p>A tegnapi foglalkozáson használt kapcsolási rajzokat és forráskódokat megtaláljátok a közös tananyagmappában.</p>
+      <p class="signature">Jó kísérletezést:<br><strong>Robotika Szakkör</strong></p>
+    `
+  }
+];
+
+const overlay = document.getElementById('errorOverlay');
+const errorText = document.getElementById('errorText');
+const inbox = document.getElementById('inbox');
+const messageView = document.getElementById('messageView');
+const mailListEl = document.getElementById('mailList');
+const mailCounterEl = document.getElementById('mailCounter');
+
+function showError(message = 'A művelet végrehajtása sikertelen.') {
+  errorText.textContent = message;
+  overlay.classList.add('show');
+}
+document.getElementById('closeError').addEventListener('click', () => overlay.classList.remove('show'));
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); });
+
+function renderMailList() {
+  mailListEl.innerHTML = '';
+  mails.forEach((m, idx) => {
+    const row = document.createElement('div');
+    row.className = 'mail-row' + (m.unread ? ' unread' : '') + (m.isSpam ? ' spam-item' : '');
+    row.setAttribute('role', 'button');
+    row.setAttribute('tabindex', '0');
+    row.innerHTML = `
+      <span class="check" data-error="A kijelölés funkció letiltva."></span>
+      <span class="star" data-error="A csillagozás nem érhető el.">☆</span>
+      <div class="sender">${m.sender}<small>${m.email}</small></div>
+      <div class="preview"><strong>${m.subject}</strong> – ${m.preview}</div>
+      <span class="time">${m.time}</span>
+    `;
+    row.addEventListener('click', e => {
+      const errEl = e.target.closest('[data-error]');
+      if (errEl) {
+        e.stopPropagation();
+        showError(errEl.dataset.error);
+        return;
+      }
+      openMail(idx);
+    });
+    row.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openMail(idx);
+      }
+    });
+    mailListEl.appendChild(row);
+  });
+}
+
+function openMail(idx) {
+  const m = mails[idx];
+  m.unread = false;
+  renderMailList();
+  inbox.classList.add('hidden');
+  document.getElementById('msgSubject').textContent = m.subject;
+  const tagEl = document.getElementById('msgTag');
+  tagEl.textContent = m.tag;
+  tagEl.style.color = 'var(--cyan)';
+  tagEl.style.borderColor = '#00ffd555';
+
+  const avEl = document.getElementById('msgAvatar');
+  avEl.textContent = m.avatar;
+  avEl.style.color = m.isSpam ? 'var(--pink)' : 'var(--cyan)';
+  avEl.style.borderColor = m.isSpam ? '#ff2bd666' : '#00ffd566';
+
+  document.getElementById('msgSenderName').innerHTML = `${m.sender} <span style="font-weight:400;color:var(--muted)">&lt;${m.email}&gt;</span>`;
+  document.getElementById('msgDate').innerHTML = `${m.time} <span data-error="A levélművelet nem érhető el." style="margin-left:10px;cursor:pointer">☆　↩　⋮</span>`;
+  document.getElementById('msgBody').innerHTML = m.body;
+
+  messageView.classList.add('visible');
+  mailCounterEl.textContent = `${idx + 1} / ${mails.length}`;
+  bindDynamicErrors(messageView);
+}
+
+function backToInbox() {
+  messageView.classList.remove('visible');
+  inbox.classList.remove('hidden');
+  mailCounterEl.textContent = `1–${mails.length} / ${mails.length}`;
+}
+
+function bindDynamicErrors(root = document) {
+  root.querySelectorAll('[data-error]').forEach(el => {
+    if (el.dataset.bound) return;
+    el.dataset.bound = '1';
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      showError(el.dataset.error);
+    });
+  });
+}
+
+document.getElementById('backToInboxBtn').addEventListener('click', backToInbox);
+document.getElementById('inboxNav').addEventListener('click', backToInbox);
+document.getElementById('toolbarBack').addEventListener('click', backToInbox);
+
+// ELLENŐRZŐ SZÓ ELLENŐRZÉS (A spam email szövegének utolsó előtti szava: "igaz")
+const pwdInput = document.getElementById('secretPassword');
+const pwdBtn = document.getElementById('checkPasswordBtn');
+const pwdFeedback = document.getElementById('solverFeedback');
+
+function verifyPassword() {
+  const val = pwdInput.value.trim().toLowerCase().replace(/[.,!?;:]+$/g, '');
+  if (!val) {
+    pwdFeedback.className = 'solver-feedback bad';
+    pwdFeedback.textContent = '✕ Írd be a spam üzenet utolsó előtti szavát!';
+    pwdInput.focus();
+    return;
+  }
+  if (val === 'igaz') {
+    pwdFeedback.className = 'solver-feedback ok';
+    pwdFeedback.innerHTML = '✓ SPAM AZONOSÍTVA! MEGSZERZETT KULCSSZÓ: <span style="display:inline-block;margin:4px 0;padding:3px 10px;border:1px solid #00ffd5;border-radius:5px;background:#00ffd51a;color:#00ffd5;font-weight:900;font-size:15px;letter-spacing:3px">PROTOKOLL</span><br><a href="03_robot_prompt.html" class="next-module-btn">TOVÁBB A 03. MODULRA (ROBOT PROMPT) ▶</a>';
+    pwdInput.disabled = true;
+    pwdBtn.disabled = true;
+  } else {
+    pwdFeedback.className = 'solver-feedback bad';
+    pwdFeedback.textContent = '✕ NEM TALÁLT! Keresd meg a gyanús spam levelet, és nézd meg az utolsó előtti szavát!';
+    pwdInput.focus();
+    pwdInput.select();
+  }
+}
+
+pwdBtn.addEventListener('click', verifyPassword);
+pwdInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') verifyPassword();
+});
+
+renderMailList();
+bindDynamicErrors(document);
+</script>
+</body></html>

@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEVEL UP // SZÖVEGSZERKESZTÉS</title>
+<style>
+:root{--bg:#05090f;--panel:#0a111b;--line:#183641;--cyan:#00ffd5;--pink:#ff2bd6;--text:#e3f5f5;--muted:#8ba8b2;--gold:#ffd166;--green:#6dff9b;--red:#ff4c75}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 20% 0%,#09202a 0,transparent 42%),radial-gradient(ellipse at 90% 90%,#210d2b 0,transparent 36%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#fff04 4px);opacity:.12;z-index:5}
+.topbar{min-height:70px;display:flex;align-items:center;gap:15px;padding:14px 24px;border-bottom:1px solid #17323c;background:#061019ef}
+.brand{font-size:19px;font-weight:800;letter-spacing:1px}.brand span{color:var(--cyan)}
+.tag{margin-left:auto;color:var(--pink);font:11px Consolas,monospace;letter-spacing:2px}
+.app{max-width:1280px;margin:auto;padding:26px 20px 48px}
+.eyebrow{color:var(--cyan);font:11px Consolas,monospace;letter-spacing:3px;margin-bottom:9px}
+.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:20px}
+.heading h1{font-size:clamp(27px,4vw,42px);margin:0}.heading h1 span{color:var(--pink)}
+.heading p{color:#c4dce2;line-height:1.6;margin:10px 0 0;max-width:860px;font-size:15px}
+.live{border:1px solid #00ffd544;color:var(--cyan);padding:10px 14px;border-radius:7px;font:12px Consolas,monospace;background:#06131b}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr);gap:20px;align-items:start}
+.panel{border:1px solid #1a3b46;background:linear-gradient(140deg,#0b141ef5,#080e17f5);border-radius:15px;overflow:hidden;box-shadow:0 0 35px #00ffd506}
+.panel-head{padding:14px 18px;border-bottom:1px solid #17313b;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#b5d0d6;font:12px Consolas,monospace;letter-spacing:1.5px;background:#07111a}
+
+/* WORD RIBBON */
+.ribbon{background:#061019;border-bottom:1px solid #17313b;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ribbon-group{display:flex;gap:5px;align-items:center;border-right:1px solid #1c3d4a;padding-right:10px;margin-right:2px}
+.ribbon-group:last-child{border-right:0;padding-right:0}
+.ribbon-btn{background:#0c1c28;border:1px solid #224a59;color:var(--text);padding:7px 11px;border-radius:5px;font:700 12px Consolas,monospace;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.ribbon-btn:hover{background:#00ffd522;border-color:var(--cyan);color:var(--cyan)}
+.color-swatch{width:24px;height:24px;border-radius:5px;border:1px solid #3c697a;cursor:pointer;padding:0;transition:transform .15s}
+.color-swatch:hover{transform:scale(1.12);border-color:#fff}
+
+/* DOCUMENT CANVAS */
+.doc-workspace{padding:24px;background:#03070c}
+.doc-page{background:#0b1521;border:1px solid #224a59;border-radius:8px;padding:28px 32px;min-height:480px;color:#d6ecf2;font-size:15px;line-height:1.7;outline:none;box-shadow:inset 0 0 25px rgba(0,255,213,0.04)}
+.doc-page:focus{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,255,213,0.12),inset 0 0 25px rgba(0,255,213,0.04)}
+.doc-page h2{margin-top:0;color:var(--cyan);font-size:20px;letter-spacing:1px}
+.doc-page ul{padding-left:24px;margin:10px 0}
+.doc-page li{margin:4px 0}
+
+/* SIDEBAR CHECKLIST */
+.side-body{padding:18px 20px;max-height:720px;overflow-y:auto}
+.side-desc{font-size:13px;color:#b4cbd0;line-height:1.5;margin:0 0 12px}
+.task-list{display:grid;gap:8px}
+.task-item{display:flex;align-items:flex-start;gap:9px;background:#071019;border:1px solid #20424d;border-radius:7px;padding:9px 11px;font-size:12px;line-height:1.4;color:#cde3e9;transition:all .2s}
+.task-item.done{border-color:var(--green);background:#6dff9b0f;color:#eafff0}
+.task-status{flex:0 0 20px;height:20px;border-radius:4px;border:1px solid #2d5968;display:grid;place-items:center;font:700 11px Consolas,monospace;color:var(--muted);margin-top:1px}
+.task-item.done .task-status{border-color:var(--green);background:var(--green);color:#041016}
+.task-item strong{color:#fff}
+.task-item.done strong{color:var(--green)}
+
+.side-actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 14px;border-radius:8px;border:1px solid var(--cyan);background:var(--cyan);color:#041016;font:800 12px Consolas,monospace;letter-spacing:1px;cursor:pointer;transition:.2s;flex:1;text-align:center}
+.btn:hover{background:#fff;box-shadow:0 0 18px var(--cyan)}
+.btn.sec{background:transparent;color:var(--text);border-color:#2b5566}
+.btn.sec:hover{border-color:var(--pink);color:#fff}
+
+/* WIN BOX */
+.keyword-box{display:none;margin-top:16px;padding:18px;border:2px solid var(--green);border-radius:12px;background:linear-gradient(135deg,#07211a,#091420);box-shadow:0 0 35px #6dff9b26;text-align:center}
+.keyword-box.show{display:block;animation:popIn .4s ease}
+.keyword-title{font:700 12px Consolas,monospace;letter-spacing:1.5px;color:var(--green);margin-bottom:6px}
+.keyword-value{display:inline-block;margin:6px 0 10px;padding:6px 20px;border:2px solid var(--cyan);border-radius:8px;background:#00ffd51a;color:var(--cyan);font:900 24px Consolas,monospace;letter-spacing:4px;text-shadow:0 0 15px #00ffd588}
+.next-btn{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:7px;background:var(--pink);color:#fff;font:800 11px Consolas,monospace;text-decoration:none;letter-spacing:1px;box-shadow:0 0 18px #ff2bd666}
+.next-btn:hover{background:#ff4de0}
+
+@keyframes popIn{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LEVEL UP UNIFIED NAVIGATION -->
+<style>
+  .lu-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(4, 10, 17, 0.96);
+    border-bottom: 1px solid #00ffd555;
+    box-shadow: 0 4px 24px rgba(0, 255, 213, 0.12);
+    font-family: Consolas, 'Segoe UI', monospace;
+    backdrop-filter: blur(8px);
+  }
+  .lu-nav-brand {
+    color: #00ffd5;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lu-nav-brand span {
+    color: #ff2bd6;
+  }
+  .lu-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .lu-nav-link {
+    text-decoration: none;
+    color: #9bc2c9;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 7px 12px;
+    border: 1px solid #1d3f4b;
+    border-radius: 6px;
+    background: #08131d;
+    transition: all 0.2s ease;
+  }
+  .lu-nav-link:hover {
+    color: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 12px rgba(0, 255, 213, 0.25);
+  }
+  .lu-nav-link.active {
+    color: #041016;
+    background: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 16px rgba(0, 255, 213, 0.45);
+  }
+  .lu-nav-arrows {
+    display: flex;
+    gap: 6px;
+  }
+  .lu-nav-arrow {
+    text-decoration: none;
+    color: #ff7ce5;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 10px;
+    border: 1px solid #ff2bd666;
+    border-radius: 6px;
+    background: rgba(255, 43, 214, 0.08);
+    transition: all 0.2s ease;
+  }
+  .lu-nav-arrow:hover {
+    background: rgba(255, 43, 214, 0.22);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 43, 214, 0.35);
+  }
+  @media (max-width: 720px) {
+    .lu-navbar {
+      padding: 8px 12px;
+      justify-content: center;
+    }
+    .lu-nav-brand {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+<nav class="lu-navbar" aria-label="Feladatok közötti navigáció">
+  <div class="lu-nav-brand">RÁKÓCZI <span>//</span> LEVEL UP</div>
+  <div class="lu-nav-links">
+    <a href="01_binary_grid.html" class="lu-nav-link">01 // GRID</a>
+    <a href="02_level_up_mail.html" class="lu-nav-link">02 // MAIL</a>
+    <a href="03_robot_prompt.html" class="lu-nav-link">03 // PROMPT</a>
+    <a href="04_kepkirako.html" class="lu-nav-link">04 // KIRAKÓ</a>
+    <a href="05_kepszerkesztes_teszt.html" class="lu-nav-link">05 // TESZT</a>
+    <a href="06_cyber_snake.html" class="lu-nav-link">06 // SNAKE</a>
+    <a href="07_szovegszerkesztes.html" class="lu-nav-link active">07 // WORD</a>
+  </div>
+  <div class="lu-nav-arrows">
+    <a href="06_cyber_snake.html" class="lu-nav-arrow" title="Előző oldal">◀ ELŐZŐ</a>
+    <a href="01_binary_grid.html" class="lu-nav-arrow" title="Következő oldal">KÖVETKEZŐ ▶</a>
+  </div>
+</nav>
+
+<header class="topbar">
+  <div class="brand">⌘ LEVEL UP <span>// DOCS LAB (10 TASKS)</span></div>
+  <div class="tag">RÁKÓCZI // SECURITY PROTOCOL 07</div>
+</header>
+
+<main class="app">
+  <div class="heading">
+    <div>
+      <div class="eyebrow">DOCUMENT RECOVERY // 10-STEP MASTERCLASS</div>
+      <h1>SZÖVEGSZERKESZTÉS <span>//</span> 10 LÉPÉS</h1>
+      <p>Teljesítsd mind a 10 formázási és helyreállítási feladatot a beépített szövegszerkesztőben! Ha mind a 10 pipa zöldre vált, a rendszer feloldja a <strong>Loop</strong> kulcsszót.</p>
+    </div>
+    <div class="live">● TELJESÍTETT LÉPÉSEK: <span id="progressCount">0 / 10</span></div>
+  </div>
+
+  <div class="layout">
+    <!-- BAL OLDAL: MINI WORD SZERKESZTŐ -->
+    <section class="panel">
+      <div class="panel-head">
+        <span>CYBER WORD EDITOR // v2.1 (10 TASKS)</span>
+        <span>LIVE DOCUMENT</span>
+      </div>
+
+      <!-- FORMÁZÓ ESZKÖZTÁR -->
+      <div class="ribbon" role="toolbar" aria-label="Szövegformázó eszköztár">
+        <div class="ribbon-group">
+          <button type="button" class="ribbon-btn" onmousedown="event.preventDefault(); execCmd('bold')" title="Félkövér (Ctrl+B)"><b>B</b></button>
+          <button type="button" class="ribbon-btn" onmousedown="event.preventDefault(); execCmd('italic')" title="Dőlt (Ctrl+I)"><i>I</i></button>
+          <button type="button" class="ribbon-btn" onmousedown="event.preventDefault(); execCmd('underline')" title="Aláhúzott (Ctrl+U)"><u>U</u></button>
+        </div>
+
+        <div class="ribbon-group">
+          <button type="button" class="ribbon-btn" onmousedown="event.preventDefault(); execCmd('justifyLeft')" title="Balra igazítás">⫷ Balra</button>
+          <button type="button" class="ribbon-btn" onmousedown="event.preventDefault(); execCmd('justifyCenter')" title="Középre igazítás">≡ Középre</button>
+          <button type="button" class="ribbon-btn" onmousedown="event.preventDefault(); execCmd('justifyRight')" title="Jobbra igazítás">⫸ Jobbra</button>
+        </div>
+
+        <div class="ribbon-group">
+          <button type="button" class="ribbon-btn" onmousedown="event.preventDefault(); execCmd('insertUnorderedList')" title="Felsorolás készítése">• Felsorolás</button>
+          <button type="button" class="ribbon-btn" onmousedown="event.preventDefault(); execCmd('insertOrderedList')" title="Számozott lista">1. Számozott</button>
+        </div>
+
+        <div class="ribbon-group">
+          <span style="font:11px Consolas,monospace;color:var(--muted);margin-right:4px">Szín:</span>
+          <button type="button" class="color-swatch" style="background:#00ffd5" onmousedown="event.preventDefault(); execCmd('foreColor', '#00ffd5')" title="Cián"></button>
+          <button type="button" class="color-swatch" style="background:#ff2bd6" onmousedown="event.preventDefault(); execCmd('foreColor', '#ff2bd6')" title="Rózsaszín"></button>
+          <button type="button" class="color-swatch" style="background:#ffd166" onmousedown="event.preventDefault(); execCmd('foreColor', '#ffd166')" title="Arany"></button>
+          <button type="button" class="color-swatch" style="background:#ffffff" onmousedown="event.preventDefault(); execCmd('foreColor', '#ffffff')" title="Fehér"></button>
+        </div>
+      </div>
+
+      <!-- SZERKESZTHETŐ DOKUMENTUM -->
+      <div class="doc-workspace">
+        <div id="docEditor" class="doc-page" contenteditable="true" spellcheck="false" aria-label="Szerkeszthető dokumentum"></div>
+      </div>
+    </section>
+
+    <!-- JOBB OLDAL: 10 FELADAT CHECKLIST -->
+    <aside class="panel">
+      <div class="panel-head">
+        <span>10-STEP MASTERCHECKLIST</span>
+        <span>AUTO-VERIFY</span>
+      </div>
+      <div class="side-body">
+        <p class="side-desc">Végezd el az alábbi 10 műveletet a bal oldali dokumentumon:</p>
+
+        <div class="task-list">
+          <div class="task-item" id="task-0">
+            <div class="task-status">1</div>
+            <div>Igazítsd <strong>középre</strong> a dokumentum főcímét (<em>RENDSZER HELYREÁLLÍTÁSI JEGYZŐKÖNYV</em>)!</div>
+          </div>
+          <div class="task-item" id="task-1">
+            <div class="task-status">2</div>
+            <div>Formázd <strong>félkövérrel (B)</strong> a <strong>KRITIKUS</strong> szót!</div>
+          </div>
+          <div class="task-item" id="task-2">
+            <div class="task-status">3</div>
+            <div>Formázd <strong>dőlttel (I)</strong> a <strong>biztonsági protokoll</strong> kifejezést!</div>
+          </div>
+          <div class="task-item" id="task-3">
+            <div class="task-status">4</div>
+            <div>Alakítsd át a 3 műveleti sort (<em>Tűzfal ellenőrzése, Adatbázis mentése, Hálózat újraindítása</em>) <strong>felsorolássá (•)</strong>!</div>
+          </div>
+          <div class="task-item" id="task-4">
+            <div class="task-status">5</div>
+            <div>Formázd <strong>aláhúzottan (U)</strong> a <strong>központi szerveren</strong> kifejezést!</div>
+          </div>
+          <div class="task-item" id="task-5">
+            <div class="task-status">6</div>
+            <div>Emeld ki <strong>félkövérrel (B)</strong> a <strong>Végrehajtandó</strong> szót!</div>
+          </div>
+          <div class="task-item" id="task-6">
+            <div class="task-status">7</div>
+            <div>Színezd át <strong>arany, cián vagy fehér színűre</strong> az aláírást (<em>Rendszergazda Csoport</em>)!</div>
+          </div>
+          <div class="task-item" id="task-7">
+            <div class="task-status">8</div>
+            <div>Igazítsd <strong>jobbra</strong> az aláírás bekezdését!</div>
+          </div>
+          <div class="task-item" id="task-8">
+            <div class="task-status">9</div>
+            <div>Formázd <strong>dőlttel (I)</strong> a <em>Figyelem!</em> szót a szöveg elején!</div>
+          </div>
+          <div class="task-item" id="task-9">
+            <div class="task-status">10</div>
+            <div>Formázd <strong>dőlttel (I)</strong> a <em>rendszerparancsok</em> kifejezést a harmadik bekezdésben!</div>
+          </div>
+        </div>
+
+        <div class="side-actions">
+          <button type="button" class="btn" id="verifyBtn">ELLENŐRZÉS</button>
+          <button type="button" class="btn sec" id="resetBtn">↻ ALAPHELYZET</button>
+        </div>
+
+        <div class="keyword-box" id="keywordBox">
+          <div class="keyword-title">✓ MIND A 10 LÉPÉS SIKERESEN TELJESÍTVE!</div>
+          <div style="color:#cbe4ea;font-size:13px;">A feloldott hivatalos kulcsszó:</div>
+          <div class="keyword-value">LOOP</div>
+          <br>
+          <a href="01_binary_grid.html" class="next-btn">↺ VISSZA A KEZDŐOLDALRA (01 // GRID)</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+const initialDocHTML = `
+  <h2 id="docTitle" style="text-align:left;">RENDSZER HELYREÁLLÍTÁSI JEGYZŐKÖNYV</h2>
+  <p><span id="atFigyelem">Figyelem!</span> A központi szerveren KRITIKUS hiba lépett fel a legutóbbi frissítés során. A rendszer védelme érdekében azonnal életbe lépett a legmagasabb szintű biztonsági protokoll.</p>
+  <p><span id="atVegrehajtando">Végrehajtandó</span> rendszerparancsok:</p>
+  <p id="cmd1">Tűzfal ellenőrzése</p>
+  <p id="cmd2">Adatbázis mentése</p>
+  <p id="cmd3">Hálózat újraindítása</p>
+  <p id="atSign" style="margin-top:24px;text-align:left;">Üdvözlettel:<br>Rendszergazda Csoport</p>
+`;
+
+const editor = document.getElementById('docEditor');
+
+function loadInitialDoc() {
+  editor.innerHTML = initialDocHTML;
+  document.getElementById('keywordBox').classList.remove('show');
+  evaluateTasks();
+}
+
+function execCmd(command, value = null) {
+  editor.focus();
+  document.execCommand(command, false, value);
+  evaluateTasks();
+}
+
+function isWordStyled(rootEl, targetPhrase, tagsToCheck, styleProp, styleValCheck) {
+  // Check all elements matching tagsToCheck or having the required style
+  const selector = tagsToCheck.map(t => t.toLowerCase()).join(',');
+  const elements = rootEl.querySelectorAll(selector);
+  for (let el of elements) {
+    if ((el.textContent || '').includes(targetPhrase)) return true;
+  }
+  
+  // Also check elements with inline styles or computed styles
+  const allEls = rootEl.querySelectorAll('*');
+  for (let el of allEls) {
+    if ((el.textContent || '').includes(targetPhrase)) {
+      if (styleProp && el.style && el.style[styleProp]) {
+        if (styleValCheck(el.style[styleProp])) return true;
+      }
+      const comp = window.getComputedStyle(el);
+      if (styleProp === 'fontWeight' && (comp.fontWeight === 'bold' || Number(comp.fontWeight) >= 600)) return true;
+      if (styleProp === 'fontStyle' && comp.fontStyle === 'italic') return true;
+      if (styleProp === 'textDecoration' && comp.textDecoration.includes('underline')) return true;
+    }
+  }
+  
+  // Fallback to tree walker for partial text node styling
+  const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, null, false);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.nodeValue && node.nodeValue.includes(targetPhrase)) {
+      let curr = node.parentElement;
+      while (curr && curr !== rootEl.parentElement) {
+        const tag = curr.tagName;
+        if (tagsToCheck.includes(tag)) return true;
+        if (styleProp && curr.style && curr.style[styleProp]) {
+          if (styleValCheck(curr.style[styleProp])) return true;
+        }
+        const comp = window.getComputedStyle(curr);
+        if (styleProp === 'fontWeight' && (comp.fontWeight === 'bold' || Number(comp.fontWeight) >= 600)) return true;
+        if (styleProp === 'fontStyle' && comp.fontStyle === 'italic') return true;
+        if (styleProp === 'textDecoration' && comp.textDecoration.includes('underline')) return true;
+        curr = curr.parentElement;
+      }
+    }
+  }
+  return false;
+}
+
+function evaluateTasks() {
+  // Task 1: Title centered
+  let t1 = false;
+  const titleEl = editor.querySelector('h2') || editor.firstElementChild;
+  if (titleEl) {
+    const alignAttr = (titleEl.getAttribute('align') || '').toLowerCase();
+    const styleAlign = (titleEl.style.textAlign || '').toLowerCase();
+    const compAlign = window.getComputedStyle(titleEl).textAlign;
+    if (alignAttr === 'center' || styleAlign === 'center' || compAlign === 'center') t1 = true;
+  }
+
+  // Task 2: "KRITIKUS" bolded
+  const t2 = isWordStyled(editor, 'KRITIKUS', ['B', 'STRONG'], 'fontWeight', v => v === 'bold' || Number(v) >= 600);
+
+  // Task 3: "biztonsági protokoll" italicized
+  const t3 = isWordStyled(editor, 'biztonsági protokoll', ['I', 'EM'], 'fontStyle', v => v === 'italic');
+
+  // Task 4: Unordered list containing the 3 commands
+  let t4 = false;
+  const uls = editor.querySelectorAll('ul');
+  uls.forEach(ul => {
+    const txt = ul.textContent || '';
+    if (txt.includes('Tűzfal ellenőrzése') && txt.includes('Adatbázis mentése') && txt.includes('Hálózat újraindítása')) {
+      t4 = true;
+    }
+  });
+
+  // Task 5: "központi szerveren" underlined
+  const t5 = isWordStyled(editor, 'központi szerveren', ['U'], 'textDecoration', v => v.includes('underline'));
+
+  // Task 6: "Végrehajtandó" bolded
+  const t6 = isWordStyled(editor, 'Végrehajtandó', ['B', 'STRONG'], 'fontWeight', v => v === 'bold' || Number(v) >= 600);
+
+  // Task 7: "Rendszergazda Csoport" colored (gold #ffd166 or cyan #00ffd5 or white #ffffff)
+  let t7 = false;
+  const walker7 = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT, null, false);
+  let n7;
+  while ((n7 = walker7.nextNode())) {
+    if (n7.nodeValue && n7.nodeValue.includes('Rendszergazda Csoport')) {
+      let curr = n7.parentElement;
+      while (curr && curr !== editor) {
+        const c = window.getComputedStyle(curr).color;
+        if (c && c !== 'rgb(214, 236, 242)' && c !== 'rgb(227, 245, 245)' && c !== 'rgba(0, 0, 0, 0)') {
+          t7 = true;
+          break;
+        }
+        curr = curr.parentElement;
+      }
+    }
+  }
+
+  // Task 8: Signature paragraph right-aligned
+  let t8 = false;
+  const paragraphs = editor.querySelectorAll('p, div');
+  paragraphs.querySelectorAll = paragraphs.querySelectorAll || document.querySelectorAll;
+  paragraphs.forEach(p => {
+    if ((p.textContent || '').includes('Rendszergazda Csoport')) {
+      const sa = (p.style.textAlign || '').toLowerCase();
+      const ca = window.getComputedStyle(p).textAlign;
+      if (sa === 'right' || ca === 'right') t8 = true;
+    }
+  });
+
+  // Task 9: "Figyelem!" italicized
+  const t9 = isWordStyled(editor, 'Figyelem!', ['I', 'EM'], 'fontStyle', v => v === 'italic');
+
+  // Task 10: "rendszerparancsok" italicized
+  const t10 = isWordStyled(editor, 'rendszerparancsok', ['I', 'EM'], 'fontStyle', v => v === 'italic');
+
+  const results = [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10];
+  let doneCount = 0;
+
+  results.forEach((ok, idx) => {
+    const el = document.getElementById(`task-${idx}`);
+    const badge = el.querySelector('.task-status');
+    if (ok) {
+      el.classList.add('done');
+      badge.textContent = '✓';
+      doneCount++;
+    } else {
+      el.classList.remove('done');
+      badge.textContent = String(idx + 1);
+    }
+  });
+
+  document.getElementById('progressCount').textContent = `${doneCount} / 10`;
+
+  const kwBox = document.getElementById('keywordBox');
+  if (doneCount === 10) {
+    kwBox.classList.add('show');
+  } else {
+    kwBox.classList.remove('show');
+  }
+}
+
+editor.addEventListener('input', evaluateTasks);
+editor.addEventListener('keyup', evaluateTasks);
+editor.addEventListener('mouseup', evaluateTasks);
+document.getElementById('verifyBtn').entries = null;
+document.getElementById('verifyBtn').addEventListener('click', () => {
+  evaluateTasks();
+  if (document.getElementById('keywordBox').classList.contains('show')) {
+    document.getElementById('keywordBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+document.getElementById('resetBtn').addEventListener('click', loadInitialDoc);
+
+loadInitialDoc();
+</script>
+</body>
+</html>
