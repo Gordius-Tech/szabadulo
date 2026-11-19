@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rákóczi Ekultúra Kupa 2.0 — Rendszer-helyreállító Konzol</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap');
+
+  :root {
+    --bg-dark: #05080f;
+    --bg-panel: rgba(10, 18, 32, 0.85);
+    --cyan: #00f3ff;
+    --cyan-dim: rgba(0, 243, 255, 0.25);
+    --magenta: #ff0055;
+    --green: #00ff88;
+    --green-dim: rgba(0, 255, 136, 0.2);
+    --amber: #ffaa00;
+    --text-main: #e0f7fa;
+    --text-muted: #6c8a9e;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Háttér Matrix / Hálózati Canvas */
+  #bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  /* CRT Scanline & Vignette overlay */
+  .scanlines {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(
+      rgba(18, 16, 16, 0) 50%, 
+      rgba(0, 0, 0, 0.35) 50%
+    ), linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.03),
+      rgba(0, 255, 0, 0.01),
+      rgba(0, 0, 255, 0.03)
+    );
+    background-size: 100% 3px, 6px 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, transparent 55%, rgba(0, 0, 0, 0.85) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Fő konténer */
+  .container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1180px;
+    padding: 24px 20px 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Fejléc */
+  header {
+    text-align: center;
+    padding: 20px;
+    background: var(--bg-panel);
+    border: 1px solid var(--cyan-dim);
+    border-top: 3px solid var(--cyan);
+    border-radius: 10px;
+    box-shadow: 0 0 25px rgba(0, 243, 255, 0.12), inset 0 0 20px rgba(0, 243, 255, 0.05);
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: "SYS.RECOVERY.PROTOCOL // v2.0.26";
+    position: absolute;
+    top: 8px;
+    left: 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--cyan);
+    opacity: 0.7;
+    letter-spacing: 1px;
+  }
+
+  .school-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.05rem;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+  }
+
+  h1.main-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow:
+      0 0 10px var(--cyan),
+      0 0 25px rgba(0, 243, 255, 0.6),
+      2px 2px 0px var(--magenta);
+    animation: titlePulse 4s infinite alternate;
+  }
+
+  @keyframes titlePulse {
+    0% { text-shadow: 0 0 10px var(--cyan), 0 0 20px rgba(0, 243, 255, 0.5), 2px 2px 0 var(--magenta); }
+    100% { text-shadow: 0 0 15px var(--cyan), 0 0 35px rgba(0, 243, 255, 0.85), -2px -1px 0 var(--magenta); }
+  }
+
+  /* Állapot és Időmérő sáv */
+  .hud-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 20px;
+    background: var(--bg-panel);
+    border: 1px solid var(--cyan-dim);
+    border-radius: 10px;
+    padding: 18px 26px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+  }
+
+  @media (max-width: 820px) {
+    .hud-bar {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+  }
+
+  /* Időmérő */
+  .timer-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hud-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .timer-display {
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--cyan);
+    text-shadow: 0 0 12px rgba(0, 243, 255, 0.6);
+    letter-spacing: 2px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  @media (max-width: 820px) {
+    .timer-display { justify-content: center; }
+  }
+
+  .timer-unit {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .timer-seconds {
+    font-size: 1.25rem;
+    color: var(--magenta);
+    text-shadow: 0 0 8px rgba(255, 0, 85, 0.6);
+  }
+
+  /* Központi Lakat Modul */
+  .lock-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .lock-ring {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 2px dashed var(--magenta);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.5s ease;
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.25), inset 0 0 15px rgba(255, 0, 85, 0.2);
+  }
+
+  .lock-ring::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: var(--cyan);
+    border-bottom-color: var(--cyan);
+    animation: spinSlow 8s linear infinite;
+  }
+
+  @keyframes spinSlow {
+    100% { transform: rotate(360deg); }
+  }
+
+  .lock-ring.unlocked {
+    border-color: var(--green);
+    border-style: solid;
+    box-shadow: 0 0 35px rgba(0, 255, 136, 0.6), inset 0 0 20px rgba(0, 255, 136, 0.35);
+    animation: lockPop 0.7s ease;
+  }
+
+  .lock-ring.unlocked::before {
+    border-top-color: var(--green);
+    border-bottom-color: var(--green);
+    animation-duration: 3s;
+  }
+
+  @keyframes lockPop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.22); }
+    70% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+
+  .lock-svg {
+    width: 54px;
+    height: 54px;
+    overflow: visible;
+  }
+
+  .lock-shackle {
+    fill: none;
+    stroke: var(--magenta);
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.4s ease;
+    transform-origin: 36px 26px;
+  }
+
+  .lock-body {
+    fill: rgba(255, 0, 85, 0.15);
+    stroke: var(--magenta);
+    stroke-width: 3.5;
+    transition: all 0.4s ease;
+  }
+
+  .lock-keyhole {
+    fill: var(--magenta);
+    transition: fill 0.4s ease;
+  }
+
+  .lock-ring.unlocked .lock-shackle {
+    stroke: var(--green);
+    transform: translateY(-9px) rotate(-18deg);
+  }
+
+  .lock-ring.unlocked .lock-body {
+    fill: rgba(0, 255, 136, 0.2);
+    stroke: var(--green);
+  }
+
+  .lock-ring.unlocked .lock-keyhole {
+    fill: var(--green);
+  }
+
+  .lock-status-text {
+    margin-top: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    color: var(--magenta);
+    text-shadow: 0 0 8px rgba(255, 0, 85, 0.5);
+    transition: color 0.4s ease;
+  }
+
+  .lock-ring.unlocked + .lock-status-text {
+    color: var(--green);
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+  }
+
+  /* Haladás (Progress) */
+  .progress-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  @media (max-width: 820px) {
+    .progress-box { align-items: center; }
+  }
+
+  .progress-count {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .progress-count span {
+    color: var(--green);
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+  }
+
+  .segments {
+    display: flex;
+    gap: 6px;
+  }
+
+  .segment {
+    width: 24px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    border-radius: 2px;
+    transition: all 0.4s ease;
+  }
+
+  .segment.active {
+    background: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 12px var(--green);
+  }
+
+  /* 8 Beviteli mező rács */
+  .grid-modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .module-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--cyan-dim);
+    border-left: 4px solid var(--cyan);
+    border-radius: 8px;
+    padding: 16px 18px;
+    position: relative;
+    transition: all 0.35s ease;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    overflow: hidden;
+  }
+
+  .module-card:hover {
+    border-color: var(--cyan);
+    box-shadow: 0 0 18px rgba(0, 243, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  /* Megoldott kártya stílusa */
+  .module-card.solved {
+    border-color: var(--green);
+    border-left: 4px solid var(--green);
+    background: linear-gradient(135deg, rgba(0, 40, 25, 0.85), rgba(8, 22, 18, 0.9));
+    box-shadow: 0 0 22px rgba(0, 255, 136, 0.22);
+  }
+
+  .module-card.just-solved {
+    animation: cardFlash 0.85s ease;
+  }
+
+  @keyframes cardFlash {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(0, 255, 136, 0); }
+    30% { transform: scale(1.04); box-shadow: 0 0 40px var(--green), inset 0 0 25px var(--green); }
+    100% { transform: scale(1); box-shadow: 0 0 22px rgba(0, 255, 136, 0.22); }
+  }
+
+  .module-card.error-shake {
+    animation: shakeError 0.4s ease;
+    border-color: var(--magenta);
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.45);
+  }
+
+  @keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  .module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .task-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: 1px;
+  }
+
+  .module-card.solved .task-name {
+    color: var(--green);
+  }
+
+  .status-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255, 0, 85, 0.15);
+    color: var(--magenta);
+    border: 1px solid rgba(255, 0, 85, 0.4);
+    letter-spacing: 1px;
+  }
+
+  .module-card.solved .status-badge {
+    background: rgba(0, 255, 136, 0.15);
+    color: var(--green);
+    border-color: rgba(0, 255, 136, 0.5);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .code-input {
+    width: 100%;
+    background: rgba(2, 6, 14, 0.85);
+    border: 1px solid rgba(0, 243, 255, 0.35);
+    border-radius: 5px;
+    padding: 10px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.05rem;
+    color: #fff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    outline: none;
+    transition: all 0.25s ease;
+  }
+
+  .code-input::placeholder {
+    color: rgba(108, 138, 158, 0.55);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+  }
+
+  .code-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 12px rgba(0, 243, 255, 0.35);
+  }
+
+  .verify-btn {
+    background: rgba(0, 243, 255, 0.12);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 10px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .verify-btn:hover {
+    background: var(--cyan);
+    color: #000;
+    box-shadow: 0 0 15px var(--cyan);
+  }
+
+  /* Megoldott állapot: kicsillagozott doboz, hoverre mutatja a szót */
+  .masked-box {
+    display: none;
+    width: 100%;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.5);
+    border-radius: 5px;
+    padding: 10px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--green);
+    letter-spacing: 3px;
+    cursor: pointer;
+    position: relative;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+
+  .module-card.solved .input-row {
+    display: none;
+  }
+
+  .module-card.solved .masked-box {
+    display: flex;
+  }
+
+  .masked-box .hover-hint {
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    color: rgba(0, 255, 136, 0.7);
+    font-family: 'Rajdhani', sans-serif;
+    text-transform: uppercase;
+  }
+
+  .masked-box:hover {
+    background: rgba(0, 255, 136, 0.18);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+  }
+
+  /* Lebegő visszajelző toast értesítés jó megoldásnál */
+  .cyber-toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 50;
+    background: rgba(4, 22, 16, 0.95);
+    border: 1px solid var(--green);
+    border-left: 5px solid var(--green);
+    color: var(--green);
+    padding: 14px 20px;
+    border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.45);
+    transform: translateX(140%);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    max-width: 340px;
+  }
+
+  .cyber-toast.show {
+    transform: translateX(0);
+  }
+
+  .cyber-toast-title {
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+    color: #fff;
+  }
+
+  /* Végső győzelmi pulzáló banner és modális / kiemelt panel */
+  .victory-banner {
+    display: none;
+    margin-top: 8px;
+    padding: 32px 24px;
+    border-radius: 12px;
+    background: radial-gradient(circle at center, rgba(0, 255, 136, 0.22) 0%, rgba(5, 18, 14, 0.96) 75%);
+    border: 2px solid var(--green);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: victoryPulse 1.8s infinite alternate;
+  }
+
+  .victory-banner.active {
+    display: block;
+  }
+
+  @keyframes victoryPulse {
+    0% {
+      box-shadow: 0 0 25px rgba(0, 255, 136, 0.45), inset 0 0 20px rgba(0, 255, 136, 0.2);
+      transform: scale(1);
+    }
+    100% {
+      box-shadow: 0 0 55px rgba(0, 255, 136, 0.9), 0 0 90px rgba(0, 243, 255, 0.4), inset 0 0 35px rgba(0, 255, 136, 0.45);
+      transform: scale(1.012);
+    }
+  }
+
+  .victory-tag {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    background: var(--green);
+    color: #02120a;
+    font-weight: bold;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .victory-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 15px var(--green), 0 0 30px var(--green);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .victory-sub {
+    font-size: 1.15rem;
+    color: #c8f7dc;
+    margin-bottom: 18px;
+  }
+
+  .victory-time-box {
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid var(--green);
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.35rem;
+    color: var(--green);
+    text-shadow: 0 0 12px rgba(0, 255, 136, 0.7);
+  }
+
+  /* Konzolos rendszerüzenet sáv alul */
+  .terminal-log {
+    background: rgba(3, 7, 14, 0.9);
+    border: 1px solid rgba(0, 243, 255, 0.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--cyan);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .reset-link {
+    background: transparent;
+    border: 1px solid rgba(255, 0, 85, 0.45);
+    color: var(--magenta);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .reset-link:hover {
+    background: rgba(255, 0, 85, 0.2);
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.4);
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<div class="cyber-toast" id="cyber-toast">
+  <div class="cyber-toast-title" id="toast-title">MODUL FELOLDVA</div>
+  <div id="toast-msg">Kulcsszó elfogadva.</div>
+</div>
+
+<div class="container">
+  <!-- Fejléc -->
+  <header>
+    <div class="school-name">Kisvárdai SZC II. Rákóczi Ferenc Technikum és Szakképző Iskola</div>
+    <h1 class="main-title">Rákóczi Ekultúra Kupa 2.0</h1>
+  </header>
+
+  <!-- HUD Sáv: Időmérő + Lakat + Haladás -->
+  <section class="hud-bar">
+    <div class="timer-box">
+      <div class="hud-label">Eltelt rendszeridő</div>
+      <div class="timer-display" id="timer-display">
+        <span id="t-hours">00</span><span class="timer-unit">ÓRA</span>
+        <span>:</span>
+        <span id="t-minutes">00</span><span class="timer-unit">PERC</span>
+        <span class="timer-seconds" id="t-seconds">00 mp</span>
+      </div>
+    </div>
+
+    <div class="lock-center">
+      <div class="lock-ring" id="lock-ring">
+        <svg class="lock-svg" viewBox="0 0 64 64">
+          <path class="lock-shackle" d="M20 28 V18 A12 12 0 0 1 44 18 V28" />
+          <rect class="lock-body" x="14" y="28" width="36" height="28" rx="5" />
+          <circle class="lock-keyhole" cx="32" cy="40" r="3.5" />
+          <path class="lock-keyhole" d="M30.5 41 L33.5 41 L34.5 48 L29.5 48 Z" />
+        </svg>
+      </div>
+      <div class="lock-status-text" id="lock-status-text">RENDSZER ZÁROLVA</div>
+    </div>
+
+    <div class="progress-box">
+      <div class="hud-label">Visszaállított modulok</div>
+      <div class="progress-count"><span id="solved-count">0</span> / 8</div>
+      <div class="segments" id="segments-container">
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Végső Győzelmi Panel (akkor jelenik meg, ha mind a 8 megvan) -->
+  <section class="victory-banner" id="victory-banner">
+    <div class="victory-tag">ACCESS GRANTED // 100% RESTORED</div>
+    <h2 class="victory-title">Sikeresen visszaállítottuk az iskola rendszerét!</h2>
+    <p class="victory-sub">Minden biztonsági kulcsszó hitelesítve — a Kisvárdai II. Rákóczi Cyber Iskola hálózata újra online.</p>
+    <div class="victory-time-box" id="final-time-text">
+      Teljesítés ideje: 0 óra 0 perc 0 másodperc
+    </div>
+  </section>
+
+  <!-- 8 Beviteli Modul -->
+  <main class="grid-modules" id="modules-grid"></main>
+
+  <!-- Alsó konzol sáv -->
+  <footer class="terminal-log">
+    <div id="console-output">&gt; RENDSZER BETÖLTVE. VÁRAKOZÁS A 8 BIZTONSÁGI KULCSSZÓRA...</div>
+    <button class="reset-link" id="reset-btn" title="Munkamenet és időmérő nullázása">MUNKAMENET TÖRLÉSE</button>
+  </footer>
+</div>
+
+<script>
+  // Feladatok és kulcsszavak konfigurációja
+  const TASKS = [
+    { id: 1, title: "01 // GRID",   keyword: "IDDQD" },
+    { id: 2, title: "02 // MAIL",   keyword: "PROTOKOLL" },
+    { id: 3, title: "03 // PROMPT", keyword: "MIKROBI" },
+    { id: 4, title: "04 // KIRAKÓ", keyword: "CYBER" },
+    { id: 5, title: "05 // TESZT",  keyword: "PIXEL" },
+    { id: 6, title: "06 // SNAKE",  keyword: "PYTHON" },
+    { id: 7, title: "07 // WORD",   keyword: "LOOP" },
+    { id: 8, title: "08 // EXCEL",  keyword: "MATRIX" }
+  ];
+
+  // Egyedi tárolási kulcs (böngészőnként/gépenként elkülönül)
+  const STORAGE_KEY = "rakoczi_ekultura_kupa_2_state";
+
+  // Web Audio API szintetizált IT hangeffektek (külső fájl nélkül működik)
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playTone(type) {
+    try {
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      const now = audioCtx.currentTime;
+
+      if (type === "success") {
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+          gain.gain.setValueAtTime(0.12, now + idx * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.07);
+          osc.stop(now + idx * 0.07 + 0.26);
+        });
+      } else if (type === "error") {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.27);
+      } else if (type === "victory") {
+        const notes = [440, 554.37, 659.25, 880, 1108.73, 1318.51];
+        notes.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+          gain.gain.setValueAtTime(0.16, now + idx * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.55);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.1);
+          osc.stop(now + idx * 0.1 + 0.56);
+        });
+      }
+    } catch (e) {}
+  }
+
+  // Állapot betöltése vagy inicializálása
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed.startTime === "number" && Array.isArray(parsed.solvedIds)) {
+          if (typeof parsed.reloadCount !== "number") parsed.reloadCount = 0;
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    const fresh = {
+      startTime: Date.now(),
+      endTime: null,
+      solvedIds: [],
+      reloadCount: 0
+    };
+    saveState(fresh);
+    return fresh;
+  }
+
+  function saveState(st) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+    } catch (e) {}
+  }
+
+  let state = loadState();
+  let timerInterval = null;
+
+  // DOM elemek
+  const gridEl = document.getElementById("modules-grid");
+  const consoleOut = document.getElementById("console-output");
+  const solvedCountEl = document.getElementById("solved-count");
+  const segments = document.querySelectorAll(".segment");
+  const lockRing = document.getElementById("lock-ring");
+  const lockStatusText = document.getElementById("lock-status-text");
+  const victoryBanner = document.getElementById("victory-banner");
+  const finalTimeText = document.getElementById("final-time-text");
+  const toastEl = document.getElementById("cyber-toast");
+  const toastTitle = document.getElementById("toast-title");
+  const toastMsg = document.getElementById("toast-msg");
+
+  let toastTimeout = null;
+  function showToast(title, msg) {
+    toastTitle.textContent = title;
+    toastMsg.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      toastEl.classList.remove("show");
+    }, 3200);
+  }
+
+  // Csillagozott szöveg generálása
+  function maskWord(word) {
+    return "*".repeat(word.length);
+  }
+
+  // Kártyák felépítése
+  function renderCards() {
+    gridEl.innerHTML = "";
+    TASKS.forEach(task => {
+      const isSolved = state.solvedIds.includes(task.id);
+      const card = document.createElement("div");
+      card.className = "module-card" + (isSolved ? " solved" : "");
+      card.id = `card-${task.id}`;
+
+      const maskedStr = maskWord(task.keyword);
+
+      card.innerHTML = `
+        <div class="module-header">
+          <div class="task-name">${task.title}</div>
+          <div class="status-badge" id="badge-${task.id}">
+            ${isSolved ? "✔ RÖGZÍTVE" : "ZÁROLVA"}
+          </div>
+        </div>
+        <div class="input-row">
+          <input
+            type="text"
+            class="code-input"
+            id="input-${task.id}"
+            placeholder="Kulcsszó..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="verify-btn" id="btn-${task.id}">OK</button>
+        </div>
+        <div class="masked-box" id="masked-${task.id}" title="Vidd rá az egeret a kulcsszó megtekintéséhez">
+          <span class="masked-value">${maskedStr}</span>
+          <span class="hover-hint">[Egeret rá: megtekint]</span>
+        </div>
+      `;
+
+      gridEl.appendChild(card);
+
+      const inputEl = card.querySelector(`#input-${task.id}`);
+      const btnEl = card.querySelector(`#btn-${task.id}`);
+      const maskedBox = card.querySelector(`#masked-${task.id}`);
+      const maskedVal = card.querySelector(".masked-value");
+      const hoverHint = card.querySelector(".hover-hint");
+
+      // Ellenőrzés események
+      btnEl.addEventListener("click", () => checkKeyword(task, inputEl, card));
+      inputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") checkKeyword(task, inputEl, card);
+      });
+
+      // Egér ráhúzásakor felfedi a kulcsszót, levételkor visszacsillagozza
+      maskedBox.addEventListener("mouseenter", () => {
+        maskedVal.textContent = task.keyword;
+        hoverHint.textContent = "[Rögzített kulcsszó]";
+      });
+      maskedBox.addEventListener("mouseleave", () => {
+        maskedVal.textContent = maskedStr;
+        hoverHint.textContent = "[Egeret rá: megtekint]";
+      });
+    });
+
+    updateHUD(false);
+  }
+
+  // Kulcsszó ellenőrzése
+  function checkKeyword(task, inputEl, card) {
+    if (state.solvedIds.includes(task.id)) return;
+
+    const val = inputEl.value.trim().toUpperCase();
+    if (!val) return;
+
+    if (val === task.keyword) {
+      state.solvedIds.push(task.id);
+      const isAllDone = state.solvedIds.length === TASKS.length;
+      if (isAllDone && !state.endTime) {
+        state.endTime = Date.now();
+      }
+      saveState(state);
+
+      // Kártya frissítése
+      card.classList.add("solved", "just-solved");
+      setTimeout(() => card.classList.remove("just-solved"), 900);
+      const badge = card.querySelector(`#badge-${task.id}`);
+      if (badge) badge.textContent = "✔ RÖGZÍTVE";
+
+      consoleOut.textContent = `> [OK] ${task.title} KULCSSZÓ ELFOGADVA (${state.solvedIds.length}/8).`;
+
+      if (isAllDone) {
+        playTone("victory");
+        showToast("RENDSZER HELYREÁLLÍTVA!", "Mind a 8 kulcsszó sikeresen rögzítve!");
+        triggerBurst();
+      } else {
+        playTone("success");
+        showToast(`${task.title} — MEGFEJTVE!`, `Sikeresen rögzítve (${state.solvedIds.length}/8 modul kész).`);
+        // Lakat rövid pulzálása részsikernél
+        lockRing.style.transform = "scale(1.12)";
+        setTimeout(() => { lockRing.style.transform = "scale(1)"; }, 300);
+      }
+
+      updateHUD(true);
+    } else {
+      playTone("error");
+      card.classList.remove("error-shake");
+      void card.offsetWidth; // reflow az animáció újraindításához
+      card.classList.add("error-shake");
+      consoleOut.textContent = `> [HIBA] ÉRVÉNYTELEN KULCSSZÓ A(Z) ${task.title} MODULNÁL!`;
+      inputEl.select();
+    }
+  }
+
+  // HUD és győzelmi állapot frissítése
+  function updateHUD(animate) {
+    const count = state.solvedIds.length;
+    solvedCountEl.textContent = count;
+
+    segments.forEach((seg, idx) => {
+      if (idx < count) seg.classList.add("active");
+      else seg.classList.remove("active");
+    });
+
+    if (count === TASKS.length) {
+      lockRing.classList.add("unlocked");
+      lockStatusText.textContent = "RENDSZER FELOLDVA";
+      victoryBanner.classList.add("active");
+      updateTimerDisplay();
+    } else {
+      lockRing.classList.remove("unlocked");
+      lockStatusText.textContent = `ZÁROLVA (${count}/8)`;
+      victoryBanner.classList.remove("active");
+    }
+  }
+
+  // Időmérő frissítése
+  function formatDuration(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return { hours, minutes, seconds };
+  }
+
+  function updateTimerDisplay() {
+    const currentNow = state.endTime ? state.endTime : Date.now();
+    const elapsed = currentNow - state.startTime;
+    const { hours, minutes, seconds } = formatDuration(elapsed);
+
+    document.getElementById("t-hours").textContent = String(hours).padStart(2, "0");
+    document.getElementById("t-minutes").textContent = String(minutes).padStart(2, "0");
+    document.getElementById("t-seconds").textContent = `${String(seconds).padStart(2, "0")} mp`;
+
+    if (state.endTime) {
+      const reloads = state.reloadCount || 0;
+      const reloadInfo = reloads > 0 ? ` | Oldalfrissítések: ${reloads}` : " | Frissítés nélkül";
+      finalTimeText.textContent = `Teljesítés ideje: ${hours} óra ${minutes} perc ${seconds} másodperc${reloadInfo}`;
+    }
+  }
+
+  // Munkamenet törlése gomb
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    if (confirm("Biztosan törlöd az eddig rögzített kulcsszavakat és újraindítod az órát?")) {
+      state = {
+        startTime: Date.now(),
+        endTime: null,
+        solvedIds: []
+      };
+      saveState(state);
+      consoleOut.textContent = "> MUNKAMENET NULLÁZVA. ÚJ IDŐMÉRÉS ELINDÍTVA.";
+      renderCards();
+      updateTimerDisplay();
+    }
+  });
+
+  // Háttér Matrix / Cyber részecske animáció
+  const canvas = document.getElementById("bg-canvas");
+  const ctx = canvas.getContext("2d");
+  let width, height, columns, drops;
+  const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンRÁKÓCZI2.0";
+  let burstMode = false;
+
+  function initCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    const fontSize = 15;
+    columns = Math.floor(width / fontSize);
+    drops = Array(columns).fill(1).map(() => Math.random() * -50);
+  }
+
+  function triggerBurst() {
+    burstMode = true;
+    setTimeout(() => { burstMode = false; }, 5000);
+  }
+
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(5, 8, 15, 0.08)";
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.font = "15px 'Share Tech Mono', monospace";
+    for (let i = 0; i < drops.length; i++) {
+      const text = chars.charAt(Math.floor(Math.random() * chars.length));
+      if (burstMode || state.solvedIds.length === TASKS.length) {
+        ctx.fillStyle = Math.random() > 0.3 ? "#00ff88" : "#00f3ff";
+      } else {
+        ctx.fillStyle = Math.random() > 0.92 ? "#ffffff" : "#00f3ff";
+      }
+      ctx.fillText(text, i * 15, drops[i] * 15);
+
+      if (drops[i] * 15 > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+    requestAnimationFrame(drawMatrix);
+  }
+
+  window.addEventListener("resize", initCanvas);
+  initCanvas();
+  drawMatrix();
+
+  // Oldalfrissítés (F5 / Ctrl+R / újratöltés) észlelése és naplózása
+  const navEntries = performance.getEntriesByType && performance.getEntriesByType("navigation");
+  const isReload = navEntries && navEntries.length > 0 && navEntries[0].type === "reload";
+  if (isReload && state.solvedIds.length < TASKS.length) {
+    state.reloadCount = (state.reloadCount || 0) + 1;
+    saveState(state);
+    consoleOut.textContent = `> [FIGYELMEZTETÉS] OLDALFRISSÍTÉS ÉSZLELVE (${state.reloadCount}. ALKALOM)! AZ IDŐMÉRŐ NEM ÁLL NULLÁRA.`;
+  }
+
+  // Böngésző kilépés / frissítés előtti megerősítés aktív játék alatt
+  window.addEventListener("beforeunload", (e) => {
+    if (state.solvedIds.length < TASKS.length) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
+
+  // Reset gomb frissítése reloadCount nullázásával is
+  const resetBtn = document.getElementById("reset-btn");
+  resetBtn.onclick = null;
+  resetBtn.addEventListener("click", () => {
+    if (confirm("Biztosan törlöd az eddig rögzített kulcsszavakat és újraindítod az órát?")) {
+      state = {
+        startTime: Date.now(),
+        endTime: null,
+        solvedIds: [],
+        reloadCount: 0
+      };
+      saveState(state);
+      consoleOut.textContent = "> MUNKAMENET NULLÁZVA. ÚJ IDŐMÉRÉS ELINDÍTVA.";
+      renderCards();
+      updateTimerDisplay();
+    }
+  });
+
+  // Indítás
+  renderCards();
+  updateTimerDisplay();
+  timerInterval = setInterval(updateTimerDisplay, 1000);
+</script>
+</body>
+</html>
