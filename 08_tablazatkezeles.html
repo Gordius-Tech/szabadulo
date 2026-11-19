@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEVEL UP // TÁBLÁZATKEZELÉS (EXCEL)</title>
+<style>
+:root{--bg:#05090f;--panel:#0a111b;--line:#183641;--cyan:#00ffd5;--pink:#ff2bd6;--text:#e3f5f5;--muted:#8ba8b2;--gold:#ffd166;--green:#6dff9b;--red:#ff4c75}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 20% 0%,#09202a 0,transparent 42%),radial-gradient(ellipse at 90% 90%,#210d2b 0,transparent 36%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 3px,#fff04 4px);opacity:.12;z-index:5}
+.topbar{min-height:70px;display:flex;align-items:center;gap:15px;padding:14px 24px;border-bottom:1px solid #17323c;background:#061019ef}
+.brand{font-size:19px;font-weight:800;letter-spacing:1px}.brand span{color:var(--cyan)}
+.tag{margin-left:auto;color:var(--pink);font:11px Consolas,monospace;letter-spacing:2px}
+.app{max-width:1320px;margin:auto;padding:26px 20px 48px}
+.eyebrow{color:var(--cyan);font:11px Consolas,monospace;letter-spacing:3px;margin-bottom:9px}
+.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:20px}
+.heading h1{font-size:clamp(27px,4vw,42px);margin:0}.heading h1 span{color:var(--pink)}
+.heading p{color:#c4dce2;line-height:1.6;margin:10px 0 0;max-width:860px;font-size:15px}
+.live{border:1px solid #00ffd544;color:var(--cyan);padding:10px 14px;border-radius:7px;font:12px Consolas,monospace;background:#06131b}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,.75fr);gap:20px;align-items:start}
+.panel{border:1px solid #1a3b46;background:linear-gradient(140deg,#0b141ef5,#080e17f5);border-radius:15px;overflow:hidden;box-shadow:0 0 35px #00ffd506}
+.panel-head{padding:14px 18px;border-bottom:1px solid #17313b;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#b5d0d6;font:12px Consolas,monospace;letter-spacing:1.5px;background:#07111a}
+
+/* EXCEL RIBBON & FORMULA BAR */
+.ribbon{background:#061019;border-bottom:1px solid #17313b;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ribbon-group{display:flex;gap:5px;align-items:center;border-right:1px solid #1c3d4a;padding-right:10px;margin-right:2px}
+.ribbon-group:last-child{border-right:0;padding-right:0}
+.ribbon-btn{background:#0c1c28;border:1px solid #224a59;color:var(--text);padding:7px 11px;border-radius:5px;font:700 12px Consolas,monospace;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.ribbon-btn:hover{background:#00ffd522;border-color:var(--cyan);color:var(--cyan)}
+.ribbon-btn.fn{border-color:#ffd16666;color:var(--gold)}
+.ribbon-btn.fn:hover{background:#ffd16622;border-color:var(--gold);color:#fff}
+
+.formula-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#040b12;border-bottom:1px solid #17313b}
+.cell-badge{min-width:52px;text-align:center;padding:6px 8px;border-radius:5px;background:#0d1f2d;border:1px solid #285668;color:var(--cyan);font:800 13px Consolas,monospace}
+.fx-label{color:var(--pink);font:italic 800 14px Georgia,serif;padding:0 4px}
+.formula-input{flex:1;background:#08131d;border:1px solid #224a59;border-radius:5px;padding:7px 11px;color:#fff;font:14px Consolas,monospace;outline:none}
+.formula-input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,255,213,0.18)}
+
+/* SPREADSHEET GRID */
+.sheet-workspace{padding:18px;background:#03070c;overflow-x:auto}
+.excel-table{width:100%;border-collapse:collapse;table-layout:fixed;min-width:560px;background:#09121c}
+.excel-table th{background:#0d1c29;color:#8bb3be;font:700 12px Consolas,monospace;padding:8px 6px;border:1px solid #1d3f4d;text-align:center;user-select:none}
+.excel-table th.row-hdr{width:42px;color:#6e95a0}
+.excel-table td{border:1px solid #1b3b48;padding:0;height:40px;position:relative;background:#0a1521;transition:background .12s}
+.excel-table td.in-range{background:rgba(0,255,213,0.14);outline:1px solid rgba(0,255,213,0.45);outline-offset:-1px}
+.excel-table td.selected{outline:2px solid var(--cyan);outline-offset:-2px;background:#0e2233;z-index:2}
+.excel-table td.locked-cell{background:#071019}
+.excel-table td.locked-cell .cell-display{cursor:not-allowed}
+.excel-table td.locked-cell.in-range{background:rgba(255,76,117,0.08);outline:1px solid rgba(255,76,117,0.35);outline-offset:-1px}
+.excel-table td.locked-cell.selected{outline:2px solid var(--pink);outline-offset:-2px;background:#160d1c}
+.cell-inline-input{width:100%;height:100%;border:none;outline:2px solid var(--cyan);outline-offset:-2px;background:#04131c;color:#fff;padding:6px 9px;font:14px Consolas,monospace}
+.error-banner{display:none;margin-bottom:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--red);background:rgba(255,76,117,0.14);color:#ffd6e0;font:700 12px Consolas,monospace;align-items:center;justify-content:space-between;gap:10px}
+.error-banner.show{display:flex;animation:popIn .2s ease}
+.error-banner span.err-code{color:var(--red);font-weight:900}
+.excel-table td.summary-row{background:#08111a}
+.excel-table td.summary-row.selected{background:#0e2233}
+.cell-display{width:100%;height:100%;padding:8px 10px;display:flex;align-items:center;font-size:14px;color:#dff3f7;overflow:hidden;white-space:nowrap;cursor:cell}
+.cell-display.num{justify-content:flex-end;font-family:Consolas,monospace}
+.cell-display.center{justify-content:center}
+.cell-display.bold{font-weight:800;color:#fff}
+.cell-display.hdr-style{color:var(--cyan);background:#0c1e2c}
+.cell-display.formula-ok{color:var(--green);font-weight:700}
+.cell-display.formula-err{color:var(--red);font-weight:700}
+
+.sheet-hint{margin-top:12px;padding:10px 14px;border-radius:8px;background:#07121c;border:1px solid #1a3a47;font-size:12px;color:#9fc0c9;line-height:1.5}
+.sheet-hint code{color:var(--gold);background:#0d1f2d;padding:2px 6px;border-radius:4px;font-family:Consolas,monospace}
+
+/* SIDEBAR CHECKLIST */
+.side-body{padding:18px 20px;max-height:740px;overflow-y:auto}
+.side-desc{font-size:13px;color:#b4cbd0;line-height:1.5;margin:0 0 12px}
+.task-list{display:grid;gap:8px}
+.task-item{display:flex;align-items:flex-start;gap:9px;background:#071019;border:1px solid #20424d;border-radius:7px;padding:9px 11px;font-size:12px;line-height:1.4;color:#cde3e9;transition:all .2s}
+.task-item.done{border-color:var(--green);background:#6dff9b0f;color:#eafff0}
+.task-status{flex:0 0 20px;height:20px;border-radius:4px;border:1px solid #2d5968;display:grid;place-items:center;font:700 11px Consolas,monospace;color:var(--muted);margin-top:1px}
+.task-item.done .task-status{border-color:var(--green);background:var(--green);color:#041016}
+.task-item strong{color:#fff}
+.task-item code{color:var(--gold);font-family:Consolas,monospace;font-size:11px}
+.task-item.done strong{color:var(--green)}
+
+.side-actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 14px;border-radius:8px;border:1px solid var(--cyan);background:var(--cyan);color:#041016;font:800 12px Consolas,monospace;letter-spacing:1px;cursor:pointer;transition:.2s;flex:1;text-align:center}
+.btn:hover{background:#fff;box-shadow:0 0 18px var(--cyan)}
+.btn.sec{background:transparent;color:var(--text);border-color:#2b5566}
+.btn.sec:hover{border-color:var(--pink);color:#fff}
+
+/* WIN BOX */
+.keyword-box{display:none;margin-top:16px;padding:18px;border:2px solid var(--green);border-radius:12px;background:linear-gradient(135deg,#07211a,#091420);box-shadow:0 0 35px #6dff9b26;text-align:center}
+.keyword-box.show{display:block;animation:popIn .4s ease}
+.keyword-title{font:700 12px Consolas,monospace;letter-spacing:1.5px;color:var(--green);margin-bottom:6px}
+.keyword-value{display:inline-block;margin:6px 0 10px;padding:6px 20px;border:2px solid var(--cyan);border-radius:8px;background:#00ffd51a;color:var(--cyan);font:900 24px Consolas,monospace;letter-spacing:4px;text-shadow:0 0 15px #00ffd588}
+.next-btn{display:inline-block;margin-top:6px;padding:9px 14px;border-radius:7px;background:var(--pink);color:#fff;font:800 11px Consolas,monospace;text-decoration:none;letter-spacing:1px;box-shadow:0 0 18px #ff2bd666}
+.next-btn:hover{background:#ff4de0}
+
+@keyframes popIn{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+@media(max-width:960px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- LEVEL UP UNIFIED NAVIGATION -->
+<style>
+  .lu-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(4, 10, 17, 0.96);
+    border-bottom: 1px solid #00ffd555;
+    box-shadow: 0 4px 24px rgba(0, 255, 213, 0.12);
+    font-family: Consolas, 'Segoe UI', monospace;
+    backdrop-filter: blur(8px);
+  }
+  .lu-nav-brand {
+    color: #00ffd5;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lu-nav-brand span {
+    color: #ff2bd6;
+  }
+  .lu-nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .lu-nav-link {
+    text-decoration: none;
+    color: #9bc2c9;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 7px 12px;
+    border: 1px solid #1d3f4b;
+    border-radius: 6px;
+    background: #08131d;
+    transition: all 0.2s ease;
+  }
+  .lu-nav-link:hover {
+    color: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 12px rgba(0, 255, 213, 0.25);
+  }
+  .lu-nav-link.active {
+    color: #041016;
+    background: #00ffd5;
+    border-color: #00ffd5;
+    box-shadow: 0 0 16px rgba(0, 255, 213, 0.45);
+  }
+  .lu-nav-arrows {
+    display: flex;
+    gap: 6px;
+  }
+  .lu-nav-arrow {
+    text-decoration: none;
+    color: #ff7ce5;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 10px;
+    border: 1px solid #ff2bd666;
+    border-radius: 6px;
+    background: rgba(255, 43, 214, 0.08);
+    transition: all 0.2s ease;
+  }
+  .lu-nav-arrow:hover {
+    background: rgba(255, 43, 214, 0.22);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 43, 214, 0.35);
+  }
+  @media (max-width: 720px) {
+    .lu-navbar {
+      padding: 8px 12px;
+      justify-content: center;
+    }
+    .lu-nav-brand {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+<nav class="lu-navbar" aria-label="Feladatok közötti navigáció">
+  <div class="lu-nav-brand">RÁKÓCZI <span>//</span> LEVEL UP</div>
+  <div class="lu-nav-links">
+    <a href="01_binary_grid.html" class="lu-nav-link">01 // GRID</a>
+    <a href="02_level_up_mail.html" class="lu-nav-link">02 // MAIL</a>
+    <a href="03_robot_prompt.html" class="lu-nav-link">03 // PROMPT</a>
+    <a href="04_kepkirako.html" class="lu-nav-link">04 // KIRAKÓ</a>
+    <a href="05_kepszerkesztes_teszt.html" class="lu-nav-link">05 // TESZT</a>
+    <a href="06_cyber_snake.html" class="lu-nav-link">06 // SNAKE</a>
+    <a href="07_szovegszerkesztes.html" class="lu-nav-link">07 // WORD</a>
+    <a href="08_tablazatkezeles.html" class="lu-nav-link active">08 // EXCEL</a>
+  </div>
+  <div class="lu-nav-arrows">
+    <a href="07_szovegszerkesztes.html" class="lu-nav-arrow" title="Előző oldal">◀ ELŐZŐ</a>
+    <a href="01_binary_grid.html" class="lu-nav-arrow" title="Következő oldal">KÖVETKEZŐ ▶</a>
+  </div>
+</nav>
+
+<header class="topbar">
+  <div class="brand">⌘ LEVEL UP <span>// EXCEL LAB (4 TASKS)</span></div>
+  <div class="tag">RÁKÓCZI // SECURITY PROTOCOL 08</div>
+</header>
+
+<main class="app">
+  <div class="heading">
+    <div>
+      <div class="eyebrow">DATA RECOVERY // SPREADSHEET FUNCTIONS</div>
+      <h1>TÁBLÁZATKEZELÉS <span>//</span> 4 LÉPÉS</h1>
+      <p>Számold ki a szerverek adatait az egyszerű <strong>SZUM</strong>, <strong>MAX</strong> és <strong>MIN</strong> függvényekkel! Ha mind a 10 feladat zöld pipára vált, a rendszer feloldja a záró kulcsszót.</p>
+    </div>
+    <div class="live">● TELJESÍTETT LÉPÉSEK: <span id="progressCount">0 / 4</span></div>
+  </div>
+
+  <div class="layout">
+    <!-- BAL OLDAL: MINI EXCEL TÁBLÁZAT -->
+    <section class="panel">
+      <div class="panel-head">
+        <span>CYBER SPREADSHEET // v1.0 (SZUM • MAX • MIN)</span>
+        <span>LIVE FORMULAS</span>
+      </div>
+
+      <!-- ESZKÖZTÁR -->
+      <div class="ribbon" role="toolbar" aria-label="Táblázatkezelő eszköztár">
+        <div class="ribbon-group">
+          <button type="button" class="ribbon-btn" id="btnBold" title="Kijelölt cella félkövérré tétele"><b>B</b> Félkövér</button>
+          <button type="button" class="ribbon-btn" id="btnBoldHeader" title="Teljes fejlécsor (A1:D1) félkövérré tétele"><b>B</b> Fejléc (A1:D1)</button>
+        </div>
+
+        <div class="ribbon-group">
+          <span style="font:11px Consolas,monospace;color:var(--muted);margin-right:4px">Használható függvények:</span>
+          <span class="ribbon-btn fn" style="cursor:default;pointer-events:none" aria-disabled="true">=SZUM(...)</span>
+          <span class="ribbon-btn fn" style="cursor:default;pointer-events:none" aria-disabled="true">=MAX(...)</span>
+          <span class="ribbon-btn fn" style="cursor:default;pointer-events:none" aria-disabled="true">=MIN(...)</span>
+        </div>
+      </div>
+
+      <!-- HIBAÜZENET SÁV -->
+      <div class="error-banner" id="errorBanner" role="alert">
+        <div><span class="err-code">⚠ ZÁROLT CELLA:</span> <span id="errorBannerText">A meglévő adatokat tartalmazó cellák nem módosíthatók!</span></div>
+        <button type="button" id="closeErrorBtn" style="background:none;border:none;color:#ffd6e0;font-weight:bold;cursor:pointer;font-family:Consolas,monospace">✕</button>
+      </div>
+
+      <!-- SZERKESZTŐLÉC (FORMULA BAR) -->
+      <div class="formula-bar">
+        <div class="cell-badge" id="activeCellBadge">B6</div>
+        <div class="fx-label">fx</div>
+        <input type="text" id="formulaInput" class="formula-input" placeholder="Írd ide a képletet (pl. =SZUM(B2:B5)) és nyomj Entert..." autocomplete="off" spellcheck="false">
+      </div>
+
+      <!-- TÁBLÁZAT RÁCS -->
+      <div class="sheet-workspace">
+        <table class="excel-table" id="excelGrid" aria-label="Szerver adatok táblázata">
+          <thead>
+            <tr>
+              <th class="row-hdr"></th>
+              <th>A</th>
+              <th>B</th>
+              <th>C</th>
+              <th>D</th>
+            </tr>
+          </thead>
+          <tbody id="gridBody"></tbody>
+        </table>
+
+        <div class="sheet-hint">
+          <strong>Tipp a használathoz:</strong> Kattints a célcellára — a fókusz automatikusan az <code>fx</code> melletti szerkesztőlécbe kerül, így azonnal beírhatod a képletet (mindig <code>=</code> jellel kezdve), majd nyomj <strong>Enter</strong> billentyűt! A már kitöltött adatcellák védettek (nem módosíthatók).
+        </div>
+      </div>
+    </section>
+
+    <!-- JOBB OLDAL: 10 FELADAT CHECKLIST -->
+    <aside class="panel">
+      <div class="panel-head">
+        <span>4-STEP EXCEL CHECKLIST</span>
+        <span>AUTO-VERIFY</span>
+      </div>
+      <div class="side-body">
+        <p class="side-desc">Végezd el az alábbi 4 alapfeladatot a bal oldali táblázatban:</p>
+
+        <div class="task-list">
+          <div class="task-item" id="task-0">
+            <div class="task-status">1</div>
+            <div>Formázd <strong>félkövérrel (B)</strong> a fejlécet (<code>A1:D1</code>)!</div>
+          </div>
+          <div class="task-item" id="task-1">
+            <div class="task-status">2</div>
+            <div>Számold ki az <strong>összes energiát</strong> a <strong><code>B6</code></strong> cellában.</div>
+          </div>
+          <div class="task-item" id="task-2">
+            <div class="task-status">3</div>
+            <div>Keresd meg a <strong>legmagasabb hőmérsékletet</strong> a <strong><code>C7</code></strong> cellában.</div>
+          </div>
+          <div class="task-item" id="task-3">
+            <div class="task-status">4</div>
+            <div>Keresd meg a <strong>legkisebb sebességet</strong> a <strong><code>D8</code></strong> cellában.</div>
+          </div>
+        </div>
+
+        <div class="side-actions">
+          <button type="button" class="btn" id="verifyBtn">ELLENŐRZÉS</button>
+          <button type="button" class="btn sec" id="resetBtn">↻ ALAPHELYZET</button>
+        </div>
+
+        <div class="keyword-box" id="keywordBox">
+          <div class="keyword-title">✓ MIND A 4 EXCEL FELADAT TELJESÍTVE!</div>
+          <div style="color:#cbe4ea;font-size:13px;">A feloldott záró kulcsszó:</div>
+          <div class="keyword-value">MATRIX</div>
+          <br>
+          <a href="01_binary_grid.html" class="next-btn">↺ VISSZA A KEZDŐOLDALRA (01 // GRID)</a>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+const COLS = ['A', 'B', 'C', 'D'];
+const ROWS = 8;
+
+const initialCells = {
+  A1: { raw: 'Szerver', bold: false, header: true },
+  B1: { raw: 'Energia (W)', bold: false, header: true },
+  C1: { raw: 'Hőmérséklet (°C)', bold: false, header: true },
+  D1: { raw: 'Sebesség (Mb/s)', bold: false, header: true },
+
+  A2: { raw: 'Alfa-01', bold: false },
+  B2: { raw: '120', bold: false },
+  C2: { raw: '45', bold: false },
+  D2: { raw: '500', bold: false },
+
+  A3: { raw: 'Béta-02', bold: false },
+  B3: { raw: '150', bold: false },
+  C3: { raw: '62', bold: false },
+  D3: { raw: '800', bold: false },
+
+  A4: { raw: 'Gamma-03', bold: false },
+  B4: { raw: '90', bold: false },
+  C4: { raw: '38', bold: false },
+  D4: { raw: '350', bold: false },
+
+  A5: { raw: 'Delta-04', bold: false },
+  B5: { raw: '240', bold: false },
+  C5: { raw: '75', bold: false },
+  D5: { raw: '950', bold: false },
+
+  A6: { raw: 'ÖSSZESEN (SZUM)', bold: true, summary: true },
+  B6: { raw: '', bold: false, summary: true },
+  C6: { raw: '', bold: false, summary: true },
+  D6: { raw: '', bold: false, summary: true },
+
+  A7: { raw: 'LEGNAGYOBB (MAX)', bold: true, summary: true },
+  B7: { raw: '', bold: false, summary: true },
+  C7: { raw: '', bold: false, summary: true },
+  D7: { raw: '', bold: false, summary: true },
+
+  A8: { raw: 'LEGKISEBB (MIN)', bold: true, summary: true },
+  B8: { raw: '', bold: false, summary: true },
+  C8: { raw: '', bold: false, summary: true },
+  D8: { raw: '', bold: false, summary: true }
+};
+
+let sheetData = {};
+let anchorCell = 'B6';
+let selectedCell = 'B6';
+let rangeEndCell = 'B6';
+let isDragging = false;
+let editingCell = null;
+let errorTimer = null;
+
+const gridBody = document.getElementById('gridBody');
+const formulaInput = document.getElementById('formulaInput');
+const activeCellBadge = document.getElementById('activeCellBadge');
+const errorBanner = document.getElementById('errorBanner');
+const errorBannerText = document.getElementById('errorBannerText');
+
+function showCellError(msg) {
+  errorBannerText.textContent = msg;
+  errorBanner.classList.add('show');
+  if (errorTimer) clearTimeout(errorTimer);
+  errorTimer = setTimeout(() => {
+    errorBanner.classList.remove('show');
+  }, 4000);
+}
+
+function hideCellError() {
+  errorBanner.classList.remove('show');
+  if (errorTimer) clearTimeout(errorTimer);
+}
+
+document.getElementById('closeErrorBtn').addEventListener('click', hideCellError);
+
+function cloneInitialData() {
+  sheetData = {};
+  for (let r = 1; r <= ROWS; r++) {
+    for (let c of COLS) {
+      const id = c + r;
+      const base = initialCells[id] || { raw: '', bold: false };
+      const hasData = String(base.raw || '').trim() !== '';
+      sheetData[id] = { ...base, locked: hasData };
+    }
+  }
+}
+
+function getNumericValue(cellId) {
+  const cell = sheetData[cellId];
+  if (!cell) return NaN;
+  const val = evaluateCell(cellId);
+  const num = parseFloat(String(val).replace(',', '.'));
+  return isNaN(num) ? NaN : num;
+}
+
+function parseRange(argStr) {
+  const nums = [];
+  const parts = argStr.split(/[;,]/);
+  for (let part of parts) {
+    part = part.trim().toUpperCase();
+    if (!part) continue;
+    if (part.includes(':')) {
+      const [start, end] = part.split(':');
+      const m1 = start.match(/^([A-D])(\d+)$/);
+      const m2 = end.match(/^([A-D])(\d+)$/);
+      if (m1 && m2) {
+        const c1 = COLS.indexOf(m1[1]);
+        const r1 = parseInt(m1[2], 10);
+        const c2 = COLS.indexOf(m2[1]);
+        const r2 = parseInt(m2[2], 10);
+        const minC = Math.min(c1, c2), maxC = Math.max(c1, c2);
+        const minR = Math.min(r1, r2), maxR = Math.max(r1, r2);
+        for (let r = minR; r <= maxR; r++) {
+          for (let c = minC; c <= maxC; c++) {
+            const v = getNumericValue(COLS[c] + r);
+            if (!isNaN(v)) nums.push(v);
+          }
+        }
+      }
+    } else if (/^[A-D]\d+$/.test(part)) {
+      const v = getNumericValue(part);
+      if (!isNaN(v)) nums.push(v);
+    } else {
+      const v = parseFloat(part.replace(',', '.'));
+      if (!isNaN(v)) nums.push(v);
+    }
+  }
+  return nums;
+}
+
+function evaluateCell(cellId) {
+  const cell = sheetData[cellId];
+  if (!cell) return '';
+  const raw = String(cell.raw || '').trim();
+  if (!raw.startsWith('=')) return raw;
+
+  const expr = raw.slice(1).trim().toUpperCase();
+
+  // SZUM / SUM
+  let m = expr.match(/^(SZUM|SUM)\(([^)]+)\)$/);
+  if (m) {
+    const nums = parseRange(m[2]);
+    if (nums.length === 0) return '#HIBA!';
+    return nums.reduce((a, b) => a + b, 0);
+  }
+
+  // MAX
+  m = expr.match(/^MAX\(([^)]+)\)$/);
+  if (m) {
+    const nums = parseRange(m[1]);
+    if (nums.length === 0) return '#HIBA!';
+    return Math.max(...nums);
+  }
+
+  // MIN
+  m = expr.match(/^MIN\(([^)]+)\)$/);
+  if (m) {
+    const nums = parseRange(m[1]);
+    if (nums.length === 0) return '#HIBA!';
+    return Math.min(...nums);
+  }
+
+  return '#KÉPLET?';
+}
+
+function parseCellCoord(id) {
+  const m = String(id || '').toUpperCase().match(/^([A-D])(\d+)$/);
+  if (!m) return null;
+  return { colIdx: COLS.indexOf(m[1]), row: parseInt(m[2], 10) };
+}
+
+function getSelectedRangeInfo() {
+  const p1 = parseCellCoord(anchorCell) || { colIdx: 1, row: 6 };
+  const p2 = parseCellCoord(rangeEndCell) || p1;
+  const minC = Math.min(p1.colIdx, p2.colIdx);
+  const maxC = Math.max(p1.colIdx, p2.colIdx);
+  const minR = Math.min(p1.row, p2.row);
+  const maxR = Math.max(p1.row, p2.row);
+
+  const ids = [];
+  for (let r = minR; r <= maxR; r++) {
+    for (let c = minC; c <= maxC; c++) {
+      ids.push(COLS[c] + r);
+    }
+  }
+
+  const startRef = COLS[minC] + minR;
+  const endRef = COLS[maxC] + maxR;
+  const isMulti = ids.length > 1;
+  const rangeStr = isMulti ? `${startRef}:${endRef}` : startRef;
+
+  return { ids, startRef, endRef, rangeStr, isMulti, minC, maxC, minR, maxR };
+}
+
+function renderGrid() {
+  const rangeInfo = getSelectedRangeInfo();
+  const rangeSet = new Set(rangeInfo.ids);
+
+  gridBody.innerHTML = '';
+  for (let r = 1; r <= ROWS; r++) {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th');
+    th.className = 'row-hdr';
+    th.textContent = r;
+    tr.appendChild(th);
+
+    for (let c of COLS) {
+      const id = c + r;
+      const cell = sheetData[id];
+      const td = document.createElement('td');
+      td.dataset.cell = id;
+      if (cell.locked) td.classList.add('locked-cell');
+      if (rangeSet.has(id)) td.classList.add('in-range');
+      if (id === selectedCell) td.classList.add('selected');
+      if (cell.summary) td.classList.add('summary-row');
+
+      if (editingCell === id && !cell.locked) {
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.id = 'activeInlineInput';
+        inp.className = 'cell-inline-input';
+        inp.value = cell.raw || '';
+        inp.autocomplete = 'off';
+        inp.spellcheck = false;
+
+        inp.addEventListener('input', () => {
+          cell.raw = inp.value;
+          formulaInput.value = inp.value;
+          evaluateTasks();
+        });
+
+        inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            cell.raw = inp.value;
+            formulaInput.value = inp.value;
+            editingCell = null;
+            renderGrid();
+            evaluateTasks();
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            editingCell = null;
+            formulaInput.value = cell.raw || '';
+            renderGrid();
+          }
+        });
+
+        inp.addEventListener('blur', (e) => {
+          if (e.relatedTarget === formulaInput) return;
+          if (editingCell === id) {
+            cell.raw = inp.value;
+            formulaInput.value = inp.value;
+            editingCell = null;
+            renderGrid();
+            evaluateTasks();
+          }
+        });
+
+        td.appendChild(inp);
+        inp.focus();
+        inp.setSelectionRange(inp.value.length, inp.value.length);
+      } else {
+        const div = document.createElement('div');
+        div.className = 'cell-display';
+        if (cell.header) div.classList.add('hdr-style');
+        if (cell.bold) div.classList.add('bold');
+
+        const displayVal = evaluateCell(id);
+        const isFormula = String(cell.raw || '').trim().startsWith('=');
+
+        if (isFormula) {
+          if (String(displayVal).startsWith('#')) {
+            div.classList.add('formula-err');
+          } else {
+            div.classList.add('formula-ok');
+          }
+        }
+
+        if (displayVal !== '' && !isNaN(Number(displayVal)) && !cell.header) {
+          div.classList.add('num');
+        }
+
+        div.textContent = displayVal;
+        td.appendChild(div);
+      }
+
+      td.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        if (editingCell === id) return;
+        if (editingCell) {
+          commitFormulaInput();
+          editingCell = null;
+        }
+        isDragging = true;
+        anchorCell = id;
+        rangeEndCell = id;
+        selectCell(id, false);
+      });
+
+      td.addEventListener('mouseenter', () => {
+        if (!isDragging) return;
+        rangeEndCell = id;
+        const info = getSelectedRangeInfo();
+        activeCellBadge.textContent = info.isMulti ? info.rangeStr : id;
+        renderGrid();
+      });
+
+
+
+      tr.appendChild(td);
+    }
+    gridBody.appendChild(tr);
+  }
+}
+
+window.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+    const info = getSelectedRangeInfo();
+    activeCellBadge.textContent = info.rangeStr;
+    if (selectedCell && sheetData[selectedCell] && !sheetData[selectedCell].locked) {
+      formulaInput.focus();
+      const len = formulaInput.value.length;
+      formulaInput.setSelectionRange(len, len);
+    }
+  }
+});
+
+
+function startEditingCell(id) {
+  const cell = sheetData[id];
+  if (!cell) return;
+  if (cell.locked) {
+    showCellError(`A(z) ${id} cella már tartalmaz adatot ("${cell.raw}"), ezért védett és nem módosítható!`);
+    return;
+  }
+  hideCellError();
+  selectedCell = id;
+  anchorCell = id;
+  rangeEndCell = id;
+  activeCellBadge.textContent = id;
+  formulaInput.value = cell.raw || '';
+  editingCell = id;
+  renderGrid();
+  setTimeout(() => {
+    const el = document.getElementById('activeInlineInput');
+    if (el) {
+      el.focus();
+      const len = el.value.length;
+      el.setSelectionRange(len, len);
+    }
+  }, 0);
+}
+
+gridBody.addEventListener('dblclick', (e) => {
+  const td = e.target.closest('td[data-cell]');
+  if (!td) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const id = td.dataset.cell;
+  startEditingCell(id);
+});
+
+function selectCell(id, resetRange = true, focusFormula = true) {
+  selectedCell = id;
+  if (resetRange) {
+    anchorCell = id;
+    rangeEndCell = id;
+  }
+  const info = getSelectedRangeInfo();
+  activeCellBadge.textContent = info.isMulti ? info.rangeStr : id;
+  formulaInput.value = sheetData[id] ? sheetData[id].raw : '';
+  renderGrid();
+  if (focusFormula && !isDragging) {
+    setTimeout(() => {
+      formulaInput.focus();
+      const len = formulaInput.value.length;
+      formulaInput.setSelectionRange(len, len);
+    }, 0);
+  }
+}
+
+function commitFormulaInput() {
+  if (!selectedCell || !sheetData[selectedCell]) return;
+  const cell = sheetData[selectedCell];
+  if (cell.locked && formulaInput.value !== cell.raw) {
+    formulaInput.value = cell.raw;
+    showCellError(`A(z) ${selectedCell} cella már tartalmaz adatot, ezért nem írható felül!`);
+    return;
+  }
+  cell.raw = formulaInput.value;
+  renderGrid();
+  evaluateTasks();
+}
+
+function insertFnTemplate(fnName) {
+  if (!selectedCell) return;
+  if (sheetData[selectedCell] && sheetData[selectedCell].locked) {
+    showCellError(`A(z) ${selectedCell} cella védett (adatot tartalmaz). Kattints egy üres képletcellára (pl. B6:D8)!`);
+    return;
+  }
+  hideCellError();
+  const info = getSelectedRangeInfo();
+  const col = selectedCell[0];
+  const rangeSuggestion = info.isMulti
+    ? info.rangeStr
+    : (['B', 'C', 'D'].includes(col) ? `${col}2:${col}5` : 'B2:B5');
+  const templ = `=${fnName}(${rangeSuggestion})`;
+  formulaInput.value = templ;
+  sheetData[selectedCell].raw = templ;
+  const startIdx = templ.indexOf('(') + 1;
+  const endIdx = templ.indexOf(')');
+  if (editingCell === selectedCell) {
+    const inlineEl = document.getElementById('activeInlineInput');
+    if (inlineEl) {
+      inlineEl.value = templ;
+      inlineEl.focus();
+      inlineEl.setSelectionRange(startIdx, endIdx);
+      evaluateTasks();
+      return;
+    }
+  }
+  formulaInput.focus();
+  formulaInput.setSelectionRange(startIdx, endIdx);
+  evaluateTasks();
+}
+
+function extractCellsFromArg(argStr) {
+  const found = [];
+  const parts = String(argStr || '').split(/[;,]/);
+  for (let part of parts) {
+    part = part.trim().toUpperCase();
+    if (!part) continue;
+    if (part.includes(':')) {
+      const [start, end] = part.split(':');
+      const m1 = start.match(/^([A-D])(\d+)$/);
+      const m2 = end.match(/^([A-D])(\d+)$/);
+      if (!m1 || !m2) return null;
+      const c1 = COLS.indexOf(m1[1]);
+      const r1 = parseInt(m1[2], 10);
+      const c2 = COLS.indexOf(m2[1]);
+      const r2 = parseInt(m2[2], 10);
+      const minC = Math.min(c1, c2), maxC = Math.max(c1, c2);
+      const minR = Math.min(r1, r2), maxR = Math.max(r1, r2);
+      for (let r = minR; r <= maxR; r++) {
+        for (let c = minC; c <= maxC; c++) {
+          found.push(COLS[c] + r);
+        }
+      }
+    } else if (/^[A-D]\d+$/.test(part)) {
+      found.push(part);
+    } else {
+      return null;
+    }
+  }
+  return found;
+}
+
+function checkFormulaTask(cellId, allowedFns, expectedRangeCol, expectedValue) {
+  const cell = sheetData[cellId];
+  if (!cell) return false;
+  const raw = String(cell.raw || '').trim().toUpperCase().replace(/\s+/g, '');
+  if (!raw.startsWith('=')) return false;
+
+  const fnMatch = raw.match(/^=([A-Z]+)\(([^)]+)\)$/);
+  if (!fnMatch) return false;
+  if (!allowedFns.includes(fnMatch[1])) return false;
+
+  const refs = extractCellsFromArg(fnMatch[2]);
+  if (!refs) return false;
+
+  const expectedCells = ['2', '3', '4', '5'].map(r => expectedRangeCol + r);
+  const uniqueRefs = [...new Set(refs)];
+  if (uniqueRefs.length !== expectedCells.length) return false;
+  if (!expectedCells.every(id => uniqueRefs.includes(id))) return false;
+
+  const val = evaluateCell(cellId);
+  if (Number(val) !== expectedValue) return false;
+
+  return true;
+}
+
+function evaluateTasks() {
+  // 1. Fejléc félkövér (A1:D1)
+  const t1 = ['A1', 'B1', 'C1', 'D1'].every(id => sheetData[id] && sheetData[id].bold === true);
+  // 2. Összes energia (B6)
+  const t2 = checkFormulaTask('B6', ['SZUM', 'SUM'], 'B', 600);
+  // 3. Legmagasabb hőmérséklet (C7)
+  const t3 = checkFormulaTask('C7', ['MAX'], 'C', 75);
+  // 4. Legkisebb sebesség (D8)
+  const t4 = checkFormulaTask('D8', ['MIN'], 'D', 350);
+
+  const results = [t1, t2, t3, t4];
+  let doneCount = 0;
+
+  results.forEach((ok, idx) => {
+    const el = document.getElementById(`task-${idx}`);
+    const badge = el.querySelector('.task-status');
+    if (ok) {
+      el.classList.add('done');
+      badge.textContent = '✓';
+      doneCount++;
+    } else {
+      el.classList.remove('done');
+      badge.textContent = String(idx + 1);
+    }
+  });
+
+  document.getElementById('progressCount').textContent = `${doneCount} / 4`;
+
+  const kwBox = document.getElementById('keywordBox');
+  if (doneCount === 4) {
+    kwBox.classList.add('show');
+  } else {
+    kwBox.classList.remove('show');
+  }
+}
+
+formulaInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (selectedCell && sheetData[selectedCell] && sheetData[selectedCell].locked && formulaInput.value !== sheetData[selectedCell].raw) {
+      formulaInput.value = sheetData[selectedCell].raw;
+      showCellError(`A(z) ${selectedCell} cella már tartalmaz adatot, ezért nem módosítható!`);
+      return;
+    }
+    commitFormulaInput();
+    const col = selectedCell[0];
+    const row = parseInt(selectedCell.slice(1), 10);
+    if (row < ROWS) {
+      selectCell(col + (row + 1));
+    }
+  }
+});
+
+formulaInput.addEventListener('input', () => {
+  if (!selectedCell || !sheetData[selectedCell]) return;
+  const cell = sheetData[selectedCell];
+  if (cell.locked) {
+    formulaInput.value = cell.raw;
+    showCellError(`A(z) ${selectedCell} cella már tartalmaz adatot, ezért nem írható át!`);
+    return;
+  }
+  hideCellError();
+  cell.raw = formulaInput.value;
+  if (editingCell === selectedCell) {
+    const inlineEl = document.getElementById('activeInlineInput');
+    if (inlineEl && inlineEl.value !== formulaInput.value) {
+      inlineEl.value = formulaInput.value;
+    }
+  } else {
+    renderGrid();
+  }
+  evaluateTasks();
+});
+
+document.getElementById('btnBold').addEventListener('click', () => {
+  const info = getSelectedRangeInfo();
+  const targets = info.isMulti ? info.ids : (selectedCell ? [selectedCell] : []);
+  if (!targets.length) return;
+  hideCellError();
+  const anyUnbold = targets.some(id => sheetData[id] && !sheetData[id].bold);
+  targets.forEach(id => {
+    if (sheetData[id]) sheetData[id].bold = anyUnbold;
+  });
+  renderGrid();
+  evaluateTasks();
+});
+
+document.getElementById('btnBoldHeader').addEventListener('click', () => {
+  ['A1', 'B1', 'C1', 'D1'].forEach(id => {
+    if (sheetData[id]) sheetData[id].bold = true;
+  });
+  renderGrid();
+  evaluateTasks();
+});
+
+document.getElementById('verifyBtn').addEventListener('click', () => {
+  commitFormulaInput();
+  if (document.getElementById('keywordBox').classList.contains('show')) {
+    document.getElementById('keywordBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  cloneInitialData();
+  document.getElementById('keywordBox').classList.remove('show');
+  selectCell('B6');
+  evaluateTasks();
+});
+
+// Initialize
+cloneInitialData();
+selectCell('B6');
+evaluateTasks();
+</script>
+</body>
+</html>
