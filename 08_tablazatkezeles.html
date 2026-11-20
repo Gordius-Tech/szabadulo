@@ -217,7 +217,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:rep
     <div>
       <div class="eyebrow">DATA RECOVERY // SPREADSHEET FUNCTIONS</div>
       <h1>TÁBLÁZATKEZELÉS <span>//</span> 4 LÉPÉS</h1>
-      <p>Számold ki a szerverek adatait az egyszerű <strong>SZUM</strong>, <strong>MAX</strong> és <strong>MIN</strong> függvényekkel! Ha mind a 10 feladat zöld pipára vált, a rendszer feloldja a záró kulcsszót.</p>
+      <p>Számold ki a szerverek adatait az egyszerű <strong>SZUM</strong>, <strong>MAX</strong> és <strong>MIN</strong> függvényekkel! Ha mind a 4 lépés zöld pipára vált, a rendszer feloldja a záró kulcsszót.</p>
     </div>
     <div class="live">● TELJESÍTETT LÉPÉSEK: <span id="progressCount">0 / 4</span></div>
   </div>
@@ -279,7 +279,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:rep
       </div>
     </section>
 
-    <!-- JOBB OLDAL: 10 FELADAT CHECKLIST -->
+    <!-- JOBB OLDAL: 4 LÉPÉS CHECKLIST -->
     <aside class="panel">
       <div class="panel-head">
         <span>4-STEP EXCEL CHECKLIST</span>
@@ -634,8 +634,6 @@ function renderGrid() {
         renderGrid();
       });
 
-
-
       tr.appendChild(td);
     }
     gridBody.appendChild(tr);
@@ -654,7 +652,6 @@ window.addEventListener('mouseup', () => {
     }
   }
 });
-
 
 function startEditingCell(id) {
   const cell = sheetData[id];
@@ -722,38 +719,6 @@ function commitFormulaInput() {
   evaluateTasks();
 }
 
-function insertFnTemplate(fnName) {
-  if (!selectedCell) return;
-  if (sheetData[selectedCell] && sheetData[selectedCell].locked) {
-    showCellError(`A(z) ${selectedCell} cella védett (adatot tartalmaz). Kattints egy üres képletcellára (pl. B6:D8)!`);
-    return;
-  }
-  hideCellError();
-  const info = getSelectedRangeInfo();
-  const col = selectedCell[0];
-  const rangeSuggestion = info.isMulti
-    ? info.rangeStr
-    : (['B', 'C', 'D'].includes(col) ? `${col}2:${col}5` : 'B2:B5');
-  const templ = `=${fnName}(${rangeSuggestion})`;
-  formulaInput.value = templ;
-  sheetData[selectedCell].raw = templ;
-  const startIdx = templ.indexOf('(') + 1;
-  const endIdx = templ.indexOf(')');
-  if (editingCell === selectedCell) {
-    const inlineEl = document.getElementById('activeInlineInput');
-    if (inlineEl) {
-      inlineEl.value = templ;
-      inlineEl.focus();
-      inlineEl.setSelectionRange(startIdx, endIdx);
-      evaluateTasks();
-      return;
-    }
-  }
-  formulaInput.focus();
-  formulaInput.setSelectionRange(startIdx, endIdx);
-  evaluateTasks();
-}
-
 function extractCellsFromArg(argStr) {
   const found = [];
   const parts = String(argStr || '').split(/[;,]/);
@@ -810,13 +775,9 @@ function checkFormulaTask(cellId, allowedFns, expectedRangeCol, expectedValue) {
 }
 
 function evaluateTasks() {
-  // 1. Fejléc félkövér (A1:D1)
   const t1 = ['A1', 'B1', 'C1', 'D1'].every(id => sheetData[id] && sheetData[id].bold === true);
-  // 2. Összes energia (B6)
   const t2 = checkFormulaTask('B6', ['SZUM', 'SUM'], 'B', 600);
-  // 3. Legmagasabb hőmérséklet (C7)
   const t3 = checkFormulaTask('C7', ['MAX'], 'C', 75);
-  // 4. Legkisebb sebesség (D8)
   const t4 = checkFormulaTask('D8', ['MIN'], 'D', 350);
 
   const results = [t1, t2, t3, t4];
@@ -918,7 +879,6 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   evaluateTasks();
 });
 
-// Initialize
 cloneInitialData();
 selectCell('B6');
 evaluateTasks();
